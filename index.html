@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Волейбол — Учёт</title>
+<title>Волейбол Учет</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6;color:#111;min-height:100vh;padding-bottom:80px}
-header{background:#2563eb;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+header{background:#1e40af;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
 header h1{font-size:18px;font-weight:700}
 header p{font-size:11px;opacity:.85}
 .nav{display:flex;gap:6px}
 .nav button{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500}
 .nav button.active{background:rgba(255,255,255,.35)}
-main{max-width:900px;margin:0 auto;padding:12px}
+main{max-width:960px;margin:0 auto;padding:12px}
 .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px;overflow:hidden}
 .card-h{padding:12px 16px;border-bottom:1px solid #eee;font-weight:600;display:flex;justify-content:space-between;align-items:center}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
@@ -23,9 +23,8 @@ main{max-width:900px;margin:0 auto;padding:12px}
 .stat .v.red{color:#dc2626}
 .stat .v.green{color:#16a34a}
 .btn{display:inline-block;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:#e5e7eb;color:#111}
-.btn.primary{background:#2563eb;color:#fff}
+.btn.primary{background:#1e40af;color:#fff}
 .btn.danger{background:#fef2f2;color:#dc2626}
-.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-row{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
 .player-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f3f4f6}
 .player-row:last-child{border-bottom:none}
@@ -39,27 +38,34 @@ main{max-width:900px;margin:0 auto;padding:12px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:#f9fafb;padding:8px 4px;font-weight:500;color:#6b7280;text-align:center;font-size:11px}
 td{padding:6px 2px;text-align:center;border-top:1px solid #f3f4f6}
-td.name{text-align:left;padding-left:8px;min-width:100px}
-.toggle{width:28px;height:28px;border-radius:50%;border:1px solid #d1d5db;background:#f3f4f6;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
-.toggle.yes{background:#22c55e;color:#fff;border-color:#16a34a}
-.toggle.no{background:#f97316;color:#fff;border-color:#ea580c}
+td.name{text-align:left;padding-left:8px;min-width:110px}
+/* Посещение — круглые */
+.toggle-att{width:28px;height:28px;border-radius:50%;border:1px solid #d1d5db;background:#f3f4f6;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.toggle-att.yes{background:#22c55e;color:#fff;border-color:#16a34a}
+.toggle-att.no{background:#f97316;color:#fff;border-color:#ea580c}
+/* Оплата — квадратные */
+.toggle-pay{width:28px;height:28px;border-radius:6px;border:1px solid #d1d5db;background:#f3f4f6;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.toggle-pay.yes{background:#3b82f6;color:#fff;border-color:#2563eb}
+.toggle-pay.no{background:#ef4444;color:#fff;border-color:#dc2626}
 input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius:6px;text-align:center;font-size:12px}
 .form-row{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;align-items:flex-end}
 .form-row label{font-size:11px;color:#6b7280;display:block;margin-bottom:3px}
-.form-row select,.form-row input{padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
+.form-row select{padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
 .hidden{display:none!important}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;z-index:100;pointer-events:none}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .empty{padding:24px;text-align:center;color:#9ca3af}
 .loading{padding:40px;text-align:center;color:#6b7280}
 .error{padding:20px;text-align:center;color:#dc2626;background:#fef2f2;border-radius:12px;margin:12px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 16px;font-size:12px;color:#6b7280;border-top:1px solid #eee}
+.legend span{display:flex;align-items:center;gap:6px}
 </style>
 </head>
 <body>
 <header>
   <div>
-    <h1>🏐 Волейбол</h1>
-    <p>Учёт посещений и оплат</p>
+    <h1>🏐 Волейбол Учет</h1>
+    <p>Посещения и оплаты</p>
   </div>
   <div class="nav">
     <button id="nav-d" class="active" onclick="show('d')">Дашборд</button>
@@ -68,7 +74,6 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
 </header>
 
 <main>
-  <!-- DASHBOARD -->
   <div id="view-d">
     <div id="dash-loading" class="loading">Загрузка...</div>
     <div id="dash-content" class="hidden">
@@ -85,13 +90,13 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
       <div class="card">
         <div class="card-h">Действия</div>
         <div class="btn-row">
-          <button class="btn" onclick="reloadAll()">🔄 Обновить данные</button>
+          <button class="btn primary" onclick="createNextMonth()">+ Новый месяц</button>
+          <button class="btn" onclick="reloadAll()">🔄 Обновить</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MONTH -->
   <div id="view-m" class="hidden">
     <div class="card">
       <div class="form-row">
@@ -100,7 +105,7 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
           <select id="month-sel" onchange="changeMonth()"></select>
         </div>
         <div style="margin-left:auto;text-align:right">
-          <label>База</label>
+          <label>База к оплате</label>
           <div style="font-size:18px;font-weight:700" id="base">—</div>
         </div>
       </div>
@@ -128,25 +133,24 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
           <tbody id="tbody"></tbody>
         </table>
       </div>
-    </div>
-    <div class="card" style="padding:12px 16px;font-size:13px;color:#6b7280">
-      Нажми на кружок: зелёный = был/сдал, оранжевый = не был/не сдал, серый = пусто.<br>
-      Данные сохраняются сразу в Google Таблицу.
+      <div class="legend">
+        <span><span class="toggle-att yes" style="width:18px;height:18px;font-size:10px">✓</span> Был</span>
+        <span><span class="toggle-att no" style="width:18px;height:18px;font-size:10px">✗</span> Не был</span>
+        <span><span class="toggle-pay yes" style="width:18px;height:18px;font-size:10px">✓</span> Сдал</span>
+        <span><span class="toggle-pay no" style="width:18px;height:18px;font-size:10px">✗</span> Не сдал</span>
+      </div>
     </div>
   </div>
 </main>
 <div id="toast"></div>
 
 <script>
-// ====================== НАСТРОЙКИ ======================
 const API_URL = 'https://script.google.com/macros/s/AKfycbxLR4RZ270NVZzgzkjtze-hwXSps33v6XS4tFJOONfAhFOGEGmsG-5S5mg5OYcq4EUC7w/exec';
 
-// ====================== СОСТОЯНИЕ ======================
 let months = [];
 let currentMonth = null;
 let monthData = null;
 
-// ====================== API ======================
 async function apiGet(params) {
   const url = API_URL + '?' + new URLSearchParams(params).toString();
   const res = await fetch(url);
@@ -168,7 +172,6 @@ async function apiPost(body) {
   return data;
 }
 
-// ====================== РАСЧЁТЫ ======================
 function calcPlayer(p, price, trainings) {
   const base = price * trainings;
   const attCount = (p.att || []).filter(x => x === 'Был').length;
@@ -176,18 +179,12 @@ function calcPlayer(p, price, trainings) {
   const paid = (p.pay || []).filter(x => x === 'Сдал').length * price + (Number(p.adj) || 0);
   const debt = base + (Number(p.carryIn) || 0) - paid;
   const credit = (debt <= 0 && missed > 0) ? missed * price : 0;
-  const out = debt - credit;
-  const st = debt > 0
-    ? `долг: ${fmt(debt)} ₺`
-    : (credit > 0 ? `кредит +${fmt(credit)}` : 'оплачено');
-  return { attCount, missed, paid, base, debt, credit, out, st };
+  const st = debt > 0 ? `долг: ${fmt(debt)} ₺` : (credit > 0 ? `кредит +${fmt(credit)}` : 'оплачено');
+  return { attCount, missed, paid, debt, credit, st };
 }
 
-function fmt(n) {
-  return Math.round(Number(n) || 0).toLocaleString('ru-RU');
-}
+function fmt(n) { return Math.round(Number(n) || 0).toLocaleString('ru-RU'); }
 
-// ====================== UI ======================
 function show(v) {
   document.getElementById('view-d').classList.toggle('hidden', v !== 'd');
   document.getElementById('view-m').classList.toggle('hidden', v !== 'm');
@@ -225,10 +222,7 @@ function renderDashboard() {
     if (c.debt > 0) {
       debtors++;
       const roleClass = p.role === 'Админ' ? 'admin' : (p.role === 'Гость' ? 'guest' : 'player');
-      html += `<div class="player-row">
-        <div>${p.name}<span class="badge ${roleClass}">${p.role || ''}</span></div>
-        <span class="debt">${fmt(c.debt)} ₺</span>
-      </div>`;
+      html += `<div class="player-row"><div>${p.name}<span class="badge ${roleClass}">${p.role||''}</span></div><span class="debt">${fmt(c.debt)} ₺</span></div>`;
     }
     if (c.attCount + c.missed > 0) {
       attSum += c.attCount / (c.attCount + c.missed);
@@ -252,19 +246,18 @@ function copyList() {
     const c = calcPlayer(p, price, trainings);
     if (c.debt > 0) text += `${p.name}: ${fmt(c.debt)} ₺\n`;
   });
-  navigator.clipboard.writeText(text).then(() => toast('Список скопирован')).catch(() => toast('Не удалось скопировать'));
+  navigator.clipboard.writeText(text).then(() => toast('Список скопирован')).catch(() => toast('Не удалось'));
 }
 
 function renderMonthView() {
   const sel = document.getElementById('month-sel');
-  sel.innerHTML = months.map(m => `<option value="${m}" ${m === currentMonth ? 'selected' : ''}>${m}</option>`).join('');
+  sel.innerHTML = months.map(m => `<option value="${m}" ${m===currentMonth?'selected':''}>${m}</option>`).join('');
 
   if (!monthData) {
     document.getElementById('month-loading').classList.remove('hidden');
     document.getElementById('month-table-card').classList.add('hidden');
     return;
   }
-
   document.getElementById('month-loading').classList.add('hidden');
   document.getElementById('month-error').classList.add('hidden');
   document.getElementById('month-table-card').classList.remove('hidden');
@@ -278,107 +271,64 @@ function renderMonthView() {
     const c = calcPlayer(p, price, trainings);
     const roleClass = p.role === 'Админ' ? 'admin' : (p.role === 'Гость' ? 'guest' : 'player');
 
-    const attBtns = (p.att || ['','','','','']).map((v, i) => {
-      const cls = v === 'Был' ? 'yes' : (v === 'Не был' ? 'no' : '');
-      const symbol = v === 'Был' ? '✓' : (v === 'Не был' ? '✗' : '·');
-      return `<td><button class="toggle ${cls}" onclick="toggleAtt('${escapeName(p.name)}',${i+1},'${v}')">${symbol}</button></td>`;
+    const attBtns = (p.att || ['','','','','']).map((v,i) => {
+      const cls = v==='Был'?'yes':(v==='Не был'?'no':'');
+      const sym = v==='Был'?'✓':(v==='Не был'?'✗':'·');
+      return `<td><button class="toggle-att ${cls}" onclick="toggleAtt('${esc(p.name)}',${i+1},'${v}')">${sym}</button></td>`;
     }).join('');
 
-    const payBtns = (p.pay || ['','','','','']).map((v, i) => {
-      const cls = v === 'Сдал' ? 'yes' : (v === 'Не сдал' ? 'no' : '');
-      const symbol = v === 'Сдал' ? '✓' : (v === 'Не сдал' ? '✗' : '·');
-      return `<td><button class="toggle ${cls}" onclick="togglePay('${escapeName(p.name)}',${i+1},'${v}')">${symbol}</button></td>`;
+    const payBtns = (p.pay || ['','','','','']).map((v,i) => {
+      const cls = v==='Сдал'?'yes':(v==='Не сдал'?'no':'');
+      const sym = v==='Сдал'?'✓':(v==='Не сдал'?'✗':'·');
+      return `<td><button class="toggle-pay ${cls}" onclick="togglePay('${esc(p.name)}',${i+1},'${v}')">${sym}</button></td>`;
     }).join('');
 
     html += `<tr>
-      <td class="name">
-        <b>${p.name}</b><br>
-        <span class="badge ${roleClass}">${p.role || ''}</span>
-        ${p.carryIn ? `<div style="font-size:10px;color:#9ca3af">перенос ${fmt(p.carryIn)}</div>` : ''}
-      </td>
-      ${attBtns}
-      ${payBtns}
-      <td><input type="number" value="${p.adj || 0}" onchange="setAdj('${escapeName(p.name)}', this.value)"></td>
-      <td>
-        <div class="${c.debt > 0 ? 'debt' : (c.credit > 0 ? 'credit' : 'ok')}">${fmt(c.debt)} ₺</div>
-        <div style="font-size:10px;color:#9ca3af">${c.st}</div>
-      </td>
+      <td class="name"><b>${p.name}</b><br><span class="badge ${roleClass}">${p.role||''}</span>
+      ${p.carryIn?`<div style="font-size:10px;color:#9ca3af">перенос ${fmt(p.carryIn)}</div>`:''}</td>
+      ${attBtns}${payBtns}
+      <td><input type="number" value="${p.adj||0}" onchange="setAdj('${esc(p.name)}',this.value)"></td>
+      <td><div class="${c.debt>0?'debt':(c.credit>0?'credit':'ok')}">${fmt(c.debt)} ₺</div>
+      <div style="font-size:10px;color:#9ca3af">${c.st}</div></td>
     </tr>`;
   });
-
   document.getElementById('tbody').innerHTML = html;
 }
 
-function escapeName(name) {
-  return String(name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-}
+function esc(n){ return String(n).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
-async function toggleAtt(playerName, week, currentValue) {
-  let next = '';
-  if (currentValue === 'Был') next = 'Не был';
-  else if (currentValue === 'Не был') next = '';
-  else next = 'Был';
-
+async function toggleAtt(player, week, cur) {
+  const next = cur==='Был' ? 'Не был' : (cur==='Не был' ? '' : 'Был');
   try {
     toast('Сохраняю...');
-    await apiPost({
-      month: currentMonth,
-      player: playerName,
-      type: 'att',
-      week: week,
-      value: next
-    });
-    const p = monthData.players.find(x => x.name === playerName);
-    if (p) p.att[week - 1] = next;
-    renderMonthView();
-    renderDashboard();
+    await apiPost({ month: currentMonth, player, type: 'att', week, value: next });
+    const p = monthData.players.find(x => x.name === player);
+    if (p) p.att[week-1] = next;
+    renderMonthView(); renderDashboard();
     toast('Сохранено');
-  } catch (err) {
-    toast('Ошибка: ' + err.message);
-  }
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
 
-async function togglePay(playerName, week, currentValue) {
-  let next = '';
-  if (currentValue === 'Сдал') next = 'Не сдал';
-  else if (currentValue === 'Не сдал') next = '';
-  else next = 'Сдал';
-
+async function togglePay(player, week, cur) {
+  const next = cur==='Сдал' ? 'Не сдал' : (cur==='Не сдал' ? '' : 'Сдал');
   try {
     toast('Сохраняю...');
-    await apiPost({
-      month: currentMonth,
-      player: playerName,
-      type: 'pay',
-      week: week,
-      value: next
-    });
-    const p = monthData.players.find(x => x.name === playerName);
-    if (p) p.pay[week - 1] = next;
-    renderMonthView();
-    renderDashboard();
+    await apiPost({ month: currentMonth, player, type: 'pay', week, value: next });
+    const p = monthData.players.find(x => x.name === player);
+    if (p) p.pay[week-1] = next;
+    renderMonthView(); renderDashboard();
     toast('Сохранено');
-  } catch (err) {
-    toast('Ошибка: ' + err.message);
-  }
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
 
-async function setAdj(playerName, value) {
+async function setAdj(player, value) {
   try {
-    await apiPost({
-      month: currentMonth,
-      player: playerName,
-      type: 'adj',
-      value: Number(value) || 0
-    });
-    const p = monthData.players.find(x => x.name === playerName);
-    if (p) p.adj = Number(value) || 0;
-    renderMonthView();
-    renderDashboard();
+    await apiPost({ month: currentMonth, player, type: 'adj', value: Number(value)||0 });
+    const p = monthData.players.find(x => x.name === player);
+    if (p) p.adj = Number(value)||0;
+    renderMonthView(); renderDashboard();
     toast('Корректировка сохранена');
-  } catch (err) {
-    toast('Ошибка: ' + err.message);
-  }
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
 
 async function changeMonth() {
@@ -390,16 +340,29 @@ async function loadMonth(name) {
   document.getElementById('month-loading').classList.remove('hidden');
   document.getElementById('month-table-card').classList.add('hidden');
   document.getElementById('month-error').classList.add('hidden');
-
   try {
-    monthData = await apiGet({ action: 'month', name: name });
+    monthData = await apiGet({ action: 'month', name });
     currentMonth = name;
-    renderMonthView();
-    renderDashboard();
-  } catch (err) {
+    renderMonthView(); renderDashboard();
+  } catch(e) {
     document.getElementById('month-loading').classList.add('hidden');
-    document.getElementById('month-error').textContent = 'Ошибка загрузки: ' + err.message;
+    document.getElementById('month-error').textContent = 'Ошибка: ' + e.message;
     document.getElementById('month-error').classList.remove('hidden');
+  }
+}
+
+async function createNextMonth() {
+  if (!confirm('Создать следующий месяц и перенести долги?')) return;
+  try {
+    toast('Создаю месяц...');
+    const res = await apiPost({ action: 'newMonth' });
+    toast('Создан месяц: ' + res.month);
+    await reloadAll();
+    currentMonth = res.month;
+    await loadMonth(currentMonth);
+    show('m');
+  } catch(e) {
+    toast('Ошибка: ' + e.message);
   }
 }
 
@@ -410,29 +373,26 @@ async function reloadAll() {
     months = data.months || [];
     if (!currentMonth && months.length) currentMonth = months[0];
     if (currentMonth) await loadMonth(currentMonth);
-    toast('Данные обновлены');
-  } catch (err) {
-    toast('Ошибка: ' + err.message);
-  }
+    toast('Обновлено');
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
 
 async function init() {
   try {
     const data = await apiGet({ action: 'months' });
     months = data.months || [];
-    if (months.length === 0) {
-      document.getElementById('dash-loading').textContent = 'Нет месяцев в таблице';
+    if (!months.length) {
+      document.getElementById('dash-loading').textContent = 'Нет месяцев';
       return;
     }
     currentMonth = months.includes('Сентябрь') ? 'Сентябрь' : months[0];
     await loadMonth(currentMonth);
     show('d');
-  } catch (err) {
+  } catch(e) {
     document.getElementById('dash-loading').innerHTML = `
-      <div style="color:#dc2626">Ошибка подключения к таблице</div>
-      <div style="font-size:13px;margin-top:8px">${err.message}</div>
-      <button class="btn primary" style="margin-top:12px" onclick="init()">Повторить</button>
-    `;
+      <div style="color:#dc2626">Ошибка подключения</div>
+      <div style="font-size:13px;margin-top:8px">${e.message}</div>
+      <button class="btn primary" style="margin-top:12px" onclick="init()">Повторить</button>`;
   }
 }
 

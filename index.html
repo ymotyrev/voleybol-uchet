@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Волейбол — Учёт</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6;color:#111;min-height:100vh;padding-bottom:80px}
+header{background:#2563eb;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:18px;font-weight:700}
+header p{font-size:11px;opacity:.85}
+.nav{display:flex;gap:6px}
+.nav button{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500}
+.nav button.active{background:rgba(255,255,255,.35)}
+main{max-width:900px;margin:0 auto;padding:12px}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px;overflow:hidden}
+.card-h{padding:12px 16px;border-bottom:1px solid #eee;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.stat .l{font-size:11px;color:#6b7280}
+.stat .v{font-size:22px;font-weight:700;margin-top:2px}
+.stat .v.red{color:#dc2626}
+.stat .v.green{color:#16a34a}
+.btn{display:inline-block;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:#e5e7eb;color:#111}
+.btn.primary{background:#2563eb;color:#fff}
+.btn.danger{background:#fef2f2;color:#dc2626}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
+.player-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f3f4f6}
+.player-row:last-child{border-bottom:none}
+.badge{font-size:11px;padding:2px 6px;border-radius:4px;margin-left:6px}
+.badge.admin{background:#ede9fe;color:#5b21b6}
+.badge.player{background:#dbeafe;color:#1e40af}
+.badge.guest{background:#fce7f3;color:#9d174d}
+.debt{color:#dc2626;font-weight:600}
+.ok{color:#16a34a}
+.credit{color:#2563eb}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f9fafb;padding:8px 4px;font-weight:500;color:#6b7280;text-align:center;font-size:11px}
+td{padding:6px 2px;text-align:center;border-top:1px solid #f3f4f6}
+td.name{text-align:left;padding-left:8px;min-width:100px}
+.toggle{width:28px;height:28px;border-radius:50%;border:1px solid #d1d5db;background:#f3f4f6;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.toggle.yes{background:#22c55e;color:#fff;border-color:#16a34a}
+.toggle.no{background:#f97316;color:#fff;border-color:#ea580c}
+input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius:6px;text-align:center;font-size:12px}
+.form-row{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;align-items:flex-end}
+.form-row label{font-size:11px;color:#6b7280;display:block;margin-bottom:3px}
+.form-row select,.form-row input{padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
+.hidden{display:none!important}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;z-index:100;pointer-events:none}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.empty{padding:24px;text-align:center;color:#9ca3af}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🏐 Волейбол</h1>
+    <p>Учёт посещений и оплат</p>
+  </div>
+  <div class="nav">
+    <button id="nav-d" class="active" onclick="show('d')">Дашборд</button>
+    <button id="nav-m" onclick="show('m')">Месяц</button>
+    <button id="nav-p" onclick="show('p')">Игроки</button>
+  </div>
+</header>
+
+<main>
+  <!-- DASHBOARD -->
+  <div id="view-d">
+    <div class="stats">
+      <div class="stat"><div class="l">Общий долг</div><div class="v red" id="s-debt">0 ₺</div></div>
+      <div class="stat"><div class="l">Собрано</div><div class="v green" id="s-paid">0 ₺</div></div>
+      <div class="stat"><div class="l">С долгом</div><div class="v" id="s-cnt">0</div></div>
+      <div class="stat"><div class="l">Посещаемость</div><div class="v" id="s-att">0%</div></div>
+    </div>
+    <div class="card">
+      <div class="card-h">Должники <button class="btn" onclick="copyList()">📋 Копировать</button></div>
+      <div id="debt-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-h">Действия</div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="newMonth()">+ Новый месяц</button>
+        <button class="btn" onclick="exportCSV()">⬇️ CSV</button>
+        <button class="btn danger" onclick="if(confirm('Сбросить все данные?')){localStorage.clear();location.reload()}">Сбросить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH -->
+  <div id="view-m" class="hidden">
+    <div class="card">
+      <div class="form-row">
+        <div>
+          <label>Месяц</label>
+          <select id="month-sel" onchange="chgMonth()"></select>
+        </div>
+        <div>
+          <label>Цена (₺)</label>
+          <input type="number" id="price" value="200" onchange="updSet()" style="width:70px">
+        </div>
+        <div>
+          <label>Тренировок</label>
+          <input type="number" id="trains" value="5" min="1" max="6" onchange="updSet()" style="width:60px">
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <label>База</label>
+          <div style="font-size:18px;font-weight:700" id="base">1000 ₺</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:8px">Игрок</th>
+              <th colspan="5">Посещение</th>
+              <th colspan="5">Оплата</th>
+              <th>Корр</th>
+              <th>Долг</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+              <th></th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="padding:12px 16px;font-size:13px;color:#6b7280">
+      Нажми на кружок: зелёный = был/сдал, оранжевый = не был/не сдал, серый = пусто
+    </div>
+  </div>
+
+  <!-- PLAYERS -->
+  <div id="view-p" class="hidden">
+    <div class="card">
+      <div class="form-row">
+        <input type="text" id="new-name" placeholder="Имя" style="flex:1;min-width:120px;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px">
+        <select id="new-role" style="padding:8px 10px;border:1px solid #d1d5db;border-radius:8px">
+          <option>Игрок</option><option>Админ</option><option>Гость</option>
+        </select>
+        <button class="btn primary" onclick="addPlayer()">Добавить</button>
+      </div>
+    </div>
+    <div class="card" id="plist"></div>
+  </div>
+</main>
+<div id="toast"></div>
+
+<script>
+const NAMES=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+const DEF=[
+  {id:1,name:"юрий",role:"Админ"},{id:2,name:"мавлюд",role:"Админ"},{id:3,name:"алишан",role:"Игрок"},
+  {id:4,name:"дина",role:"Игрок"},{id:5,name:"надя",role:"Админ"},{id:6,name:"Влад",role:"Игрок"},
+  {id:7,name:"Виктор Г",role:"Игрок"},{id:8,name:"Роман",role:"Игрок"},{id:9,name:"Вилан",role:"Игрок"},
+  {id:10,name:"тимур",role:"Админ"},{id:11,name:"айдар",role:"Игрок"},{id:12,name:"Валя",role:"Игрок"},
+  {id:13,name:"Мавлюд Иш",role:"Игрок"},{id:14,name:"Элан",role:"Игрок"},{id:15,name:"Диана",role:"Гость"},
+  {id:16,name:"Дима",role:"Игрок"},{id:17,name:"Настя",role:"Игрок"},{id:18,name:"Нияз",role:"Игрок"},
+  {id:19,name:"Ассет",role:"Игрок"},{id:20,name:"Алиса",role:"Гость"},{id:21,name:"Назли",role:"Гость"},
+  {id:22,name:"Иви",role:"Гость"},{id:23,name:"Никита",role:"Гость"},{id:24,name:"Данил",role:"Гость"}
+];
+const SEP={
+  1:{a:["Был","Был","Был","Не был","Не был"],p:["Сдал","Сдал","Сдал","Сдал","Сдал"],adj:-50,c:0},
+  2:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  3:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  4:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  5:{a:["Не был","Не был","Был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  6:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  7:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  8:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  9:{a:["Был","Не был","Не был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  10:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  11:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  12:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  13:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  14:{a:["Был","Не был","Был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  15:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  16:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  17:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  18:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  19:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  20:{a:["Был","Был","Был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  21:{a:["Не был","Не был","Был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  22:{a:["Не был","Не был","Был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  23:{a:["Не был","Не был","Был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
+  24:{a:["Не был","Не был","Не был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0}
+};
+
+let S={players:[],months:{},cur:null};
+
+function load(){
+  try{
+    const r=localStorage.getItem('vb2');
+    if(r){S=JSON.parse(r);return}
+  }catch(e){}
+  S.players=DEF.map(p=>({...p}));
+  S.months["2025-09"]={price:200,trainings:5,data:{}};
+  for(let id in SEP){
+    const d=SEP[id];
+    S.months["2025-09"].data[id]={att:d.a,pay:d.p,adj:d.adj,carryIn:d.c};
+  }
+  S.cur="2025-09";
+  save();
+}
+function save(){try{localStorage.setItem('vb2',JSON.stringify(S))}catch(e){}}
+function fmt(n){return Math.round(n).toLocaleString('ru-RU')}
+function label(k){const[y,m]=k.split('-');return NAMES[+m-1]+' '+y}
+
+function calc(k,id){
+  const m=S.months[k];if(!m)return null;
+  const d=m.data[id]||{att:["","","","",""],pay:["","","","",""],adj:0,carryIn:0};
+  const price=m.price||200,tr=m.trainings||5,base=price*tr;
+  const att=d.att.filter(x=>x==="Был").length;
+  const miss=Math.max(tr-att,0);
+  const paid=d.pay.filter(x=>x==="Сдал").length*price+(d.adj||0);
+  const debt=base+(d.carryIn||0)-paid;
+  const credit=(debt<=0&&miss>0)?miss*price:0;
+  const out=debt-credit;
+  const st=debt>0?`долг: ${fmt(debt)} ₺`:(credit>0?`кредит +${fmt(credit)}`:'оплачено');
+  return{att,miss,paid,base,debt,credit,out,st};
+}
+
+function show(v){
+  ['d','m','p'].forEach(x=>{
+    document.getElementById('view-'+x).classList.toggle('hidden',x!==v);
+    document.getElementById('nav-'+x).classList.toggle('active',x===v);
+  });
+  if(v==='d')rendD();
+  if(v==='m')rendM();
+  if(v==='p')rendP();
+}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.opacity=1;setTimeout(()=>e.style.opacity=0,2000)}
+
+function rendD(){
+  const k=S.cur;if(!k){return}
+  let debt=0,paid=0,cnt=0,attS=0,attN=0;
+  let html='';
+  S.players.forEach(p=>{
+    const c=calc(k,p.id);if(!c)return;
+    debt+=Math.max(c.debt,0);paid+=c.paid;
+    if(c.debt>0){
+      cnt++;
+      html+=`<div class="player-row"><div>${p.name}<span class="badge ${p.role==='Админ'?'admin':p.role==='Гость'?'guest':'player'}">${p.role}</span></div><span class="debt">${fmt(c.debt)} ₺</span></div>`;
+    }
+    if(c.att+c.miss>0){attS+=c.att/(c.att+c.miss);attN++}
+  });
+  document.getElementById('s-debt').textContent=fmt(debt)+' ₺';
+  document.getElementById('s-paid').textContent=fmt(paid)+' ₺';
+  document.getElementById('s-cnt').textContent=cnt;
+  document.getElementById('s-att').textContent=attN?Math.round(attS/attN*100)+'%':'—';
+  document.getElementById('debt-list').innerHTML=html||'<div class="empty">Нет должников 🎉</div>';
+}
+function copyList(){
+  const k=S.cur;if(!k)return;
+  let t=`Должники (${label(k)}):\n\n`;
+  S.players.forEach(p=>{const c=calc(k,p.id);if(c&&c.debt>0)t+=`${p.name}: ${fmt(c.debt)} ₺\n`});
+  navigator.clipboard.writeText(t).then(()=>toast('Скопировано')).catch(()=>toast('Не удалось'));
+}
+
+function chgMonth(){S.cur=document.getElementById('month-sel').value;save();rendM()}
+function updSet(){
+  const m=S.months[S.cur];if(!m)return;
+  m.price=+document.getElementById('price').value||200;
+  m.trainings=+document.getElementById('trains').value||5;
+  document.getElementById('base').textContent=fmt(m.price*m.trainings)+' ₺';
+  save();rendM();
+}
+function rendM(){
+  const sel=document.getElementById('month-sel');
+  const keys=Object.keys(S.months).sort();
+  sel.innerHTML=keys.map(k=>`<option value="${k}" ${k===S.cur?'selected':''}>${label(k)}</option>`).join('');
+  const m=S.months[S.cur];if(!m)return;
+  document.getElementById('price').value=m.price;
+  document.getElementById('trains').value=m.trainings;
+  document.getElementById('base').textContent=fmt(m.price*m.trainings)+' ₺';
+  let html='';
+  S.players.forEach(p=>{
+    const d=m.data[p.id]||{att:["","","","",""],pay:["","","","",""],adj:0,carryIn:0};
+    while(d.att.length<5)d.att.push("");while(d.pay.length<5)d.pay.push("");
+    const c=calc(S.cur,p.id);
+    const attB=d.att.map((v,i)=>`<td><button class="toggle ${v==='Был'?'yes':v==='Не был'?'no':''}" onclick="togA(${p.id},${i})">${v==='Был'?'✓':v==='Не был'?'✗':'·'}</button></td>`).join('');
+    const payB=d.pay.map((v,i)=>`<td><button class="toggle ${v==='Сдал'?'yes':v==='Не сдал'?'no':''}" onclick="togP(${p.id},${i})">${v==='Сдал'?'✓':v==='Не сдал'?'✗':'·'}</button></td>`).join('');
+    html+=`<tr>
+      <td class="name"><b>${p.name}</b><br><span class="badge ${p.role==='Админ'?'admin':p.role==='Гость'?'guest':'player'}">${p.role}</span>${d.carryIn?`<div style="font-size:10px;color:#9ca3af">перенос ${fmt(d.carryIn)}</div>`:''}</td>
+      ${attB}${payB}
+      <td><input type="number" value="${d.adj||0}" onchange="setAdj(${p.id},this.value)"></td>
+      <td><div class="${c.debt>0?'debt':c.credit>0?'credit':'ok'}">${fmt(c.debt)} ₺</div><div style="font-size:10px;color:#9ca3af">${c.st}</div></td>
+    </tr>`;
+  });
+  document.getElementById('tbody').innerHTML=html;
+}
+function ens(id){const m=S.months[S.cur];if(!m.data[id])m.data[id]={att:["","","","",""],pay:["","","","",""],adj:0,carryIn:0};return m.data[id]}
+function togA(id,w){const d=ens(id);const c=d.att[w];d.att[w]=c==="Был"?"Не был":(c==="Не был"?"":"Был");save();rendM()}
+function togP(id,w){const d=ens(id);const c=d.pay[w];d.pay[w]=c==="Сдал"?"Не сдал":(c==="Не сдал"?"":"Сдал");save();rendM()}
+function setAdj(id,v){ens(id).adj=+v||0;save();rendM()}
+
+function newMonth(){
+  const keys=Object.keys(S.months).sort();
+  let nk;
+  if(!keys.length){const n=new Date();nk=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`}
+  else{let[y,m]=keys[keys.length-1].split('-').map(Number);m++;if(m>12){m=1;y++}nk=`${y}-${String(m).padStart(2,'0')}`}
+  if(S.months[nk]){toast('Уже есть');return}
+  const prev=keys.length?S.months[keys[keys.length-1]]:null;
+  const data={};
+  S.players.forEach(p=>{
+    const c=prev?calc(keys[keys.length-1],p.id):null;
+    data[p.id]={att:["","","","",""],pay:["","","","",""],adj:0,carryIn:c?c.out:0};
+  });
+  S.months[nk]={price:prev?prev.price:200,trainings:prev?prev.trainings:5,data};
+  S.cur=nk;save();toast('Создан '+label(nk));show('m');
+}
+
+function rendP(){
+  document.getElementById('plist').innerHTML=S.players.map(p=>`
+    <div class="player-row">
+      <div>${p.name}<span class="badge ${p.role==='Админ'?'admin':p.role==='Гость'?'guest':'player'}">${p.role}</span></div>
+      <button class="btn danger" onclick="delP(${p.id})">Удалить</button>
+    </div>`).join('');
+}
+function addPlayer(){
+  const name=document.getElementById('new-name').value.trim();
+  if(!name){toast('Введите имя');return}
+  const role=document.getElementById('new-role').value;
+  const id=S.players.reduce((a,p)=>Math.max(a,p.id),0)+1;
+  S.players.push({id,name,role});
+  Object.values(S.months).forEach(m=>{m.data[id]={att:["","","","",""],pay:["","","","",""],adj:0,carryIn:0}});
+  document.getElementById('new-name').value='';save();rendP();toast('Добавлен');
+}
+function delP(id){if(!confirm('Удалить?'))return;S.players=S.players.filter(p=>p.id!==id);Object.values(S.months).forEach(m=>delete m.data[id]);save();rendP();toast('Удалён')}
+
+function exportCSV(){
+  const k=S.cur;if(!k)return;const m=S.months[k];
+  let csv='\uFEFFИмя;Роль;Перенос;Посещ;Пропущ;Оплачено;Корр;Долг;Кредит;Перенос_след\n';
+  S.players.forEach(p=>{
+    const d=m.data[p.id]||{adj:0,carryIn:0};const c=calc(k,p.id);
+    csv+=`${p.name};${p.role};${d.carryIn||0};${c.att};${c.miss};${c.paid};${d.adj||0};${c.debt};${c.credit};${c.out}\n`;
+  });
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`voleybol_${k}.csv`;a.click();
+  toast('Скачано');
+}
+
+load();
+show('d');
+</script>
+</body>
+</html>

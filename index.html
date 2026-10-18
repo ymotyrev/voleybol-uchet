@@ -25,6 +25,7 @@ main{max-width:900px;margin:0 auto;padding:12px}
 .btn{display:inline-block;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:#e5e7eb;color:#111}
 .btn.primary{background:#2563eb;color:#fff}
 .btn.danger{background:#fef2f2;color:#dc2626}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-row{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
 .player-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f3f4f6}
 .player-row:last-child{border-bottom:none}
@@ -50,6 +51,8 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;z-index:100;pointer-events:none}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .empty{padding:24px;text-align:center;color:#9ca3af}
+.loading{padding:40px;text-align:center;color:#6b7280}
+.error{padding:20px;text-align:center;color:#dc2626;background:#fef2f2;border-radius:12px;margin:12px}
 </style>
 </head>
 <body>
@@ -61,29 +64,29 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
   <div class="nav">
     <button id="nav-d" class="active" onclick="show('d')">Дашборд</button>
     <button id="nav-m" onclick="show('m')">Месяц</button>
-    <button id="nav-p" onclick="show('p')">Игроки</button>
   </div>
 </header>
 
 <main>
   <!-- DASHBOARD -->
   <div id="view-d">
-    <div class="stats">
-      <div class="stat"><div class="l">Общий долг</div><div class="v red" id="s-debt">0 ₺</div></div>
-      <div class="stat"><div class="l">Собрано</div><div class="v green" id="s-paid">0 ₺</div></div>
-      <div class="stat"><div class="l">С долгом</div><div class="v" id="s-cnt">0</div></div>
-      <div class="stat"><div class="l">Посещаемость</div><div class="v" id="s-att">0%</div></div>
-    </div>
-    <div class="card">
-      <div class="card-h">Должники <button class="btn" onclick="copyList()">📋 Копировать</button></div>
-      <div id="debt-list"></div>
-    </div>
-    <div class="card">
-      <div class="card-h">Действия</div>
-      <div class="btn-row">
-        <button class="btn primary" onclick="newMonth()">+ Новый месяц</button>
-        <button class="btn" onclick="exportCSV()">⬇️ CSV</button>
-        <button class="btn danger" onclick="if(confirm('Сбросить все данные?')){localStorage.clear();location.reload()}">Сбросить</button>
+    <div id="dash-loading" class="loading">Загрузка...</div>
+    <div id="dash-content" class="hidden">
+      <div class="stats">
+        <div class="stat"><div class="l">Общий долг</div><div class="v red" id="s-debt">0 ₺</div></div>
+        <div class="stat"><div class="l">Собрано</div><div class="v green" id="s-paid">0 ₺</div></div>
+        <div class="stat"><div class="l">С долгом</div><div class="v" id="s-cnt">0</div></div>
+        <div class="stat"><div class="l">Посещаемость</div><div class="v" id="s-att">0%</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h">Должники <button class="btn" onclick="copyList()">📋 Копировать</button></div>
+        <div id="debt-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-h">Действия</div>
+        <div class="btn-row">
+          <button class="btn" onclick="reloadAll()">🔄 Обновить данные</button>
+        </div>
       </div>
     </div>
   </div>
@@ -94,23 +97,17 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
       <div class="form-row">
         <div>
           <label>Месяц</label>
-          <select id="month-sel" onchange="chgMonth()"></select>
-        </div>
-        <div>
-          <label>Цена (₺)</label>
-          <input type="number" id="price" value="200" onchange="updSet()" style="width:70px">
-        </div>
-        <div>
-          <label>Тренировок</label>
-          <input type="number" id="trains" value="5" min="1" max="6" onchange="updSet()" style="width:60px">
+          <select id="month-sel" onchange="changeMonth()"></select>
         </div>
         <div style="margin-left:auto;text-align:right">
           <label>База</label>
-          <div style="font-size:18px;font-weight:700" id="base">1000 ₺</div>
+          <div style="font-size:18px;font-weight:700" id="base">—</div>
         </div>
       </div>
     </div>
-    <div class="card">
+    <div id="month-loading" class="loading hidden">Загрузка месяца...</div>
+    <div id="month-error" class="error hidden"></div>
+    <div class="card" id="month-table-card">
       <div class="scroll">
         <table>
           <thead>
@@ -133,220 +130,313 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
       </div>
     </div>
     <div class="card" style="padding:12px 16px;font-size:13px;color:#6b7280">
-      Нажми на кружок: зелёный = был/сдал, оранжевый = не был/не сдал, серый = пусто
+      Нажми на кружок: зелёный = был/сдал, оранжевый = не был/не сдал, серый = пусто.<br>
+      Данные сохраняются сразу в Google Таблицу.
     </div>
-  </div>
-
-  <!-- PLAYERS -->
-  <div id="view-p" class="hidden">
-    <div class="card">
-      <div class="form-row">
-        <input type="text" id="new-name" placeholder="Имя" style="flex:1;min-width:120px;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px">
-        <select id="new-role" style="padding:8px 10px;border:1px solid #d1d5db;border-radius:8px">
-          <option>Игрок</option><option>Админ</option><option>Гость</option>
-        </select>
-        <button class="btn primary" onclick="addPlayer()">Добавить</button>
-      </div>
-    </div>
-    <div class="card" id="plist"></div>
   </div>
 </main>
 <div id="toast"></div>
 
 <script>
-const NAMES=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
-const DEF=[
-  {id:1,name:"юрий",role:"Админ"},{id:2,name:"мавлюд",role:"Админ"},{id:3,name:"алишан",role:"Игрок"},
-  {id:4,name:"дина",role:"Игрок"},{id:5,name:"надя",role:"Админ"},{id:6,name:"Влад",role:"Игрок"},
-  {id:7,name:"Виктор Г",role:"Игрок"},{id:8,name:"Роман",role:"Игрок"},{id:9,name:"Вилан",role:"Игрок"},
-  {id:10,name:"тимур",role:"Админ"},{id:11,name:"айдар",role:"Игрок"},{id:12,name:"Валя",role:"Игрок"},
-  {id:13,name:"Мавлюд Иш",role:"Игрок"},{id:14,name:"Элан",role:"Игрок"},{id:15,name:"Диана",role:"Гость"},
-  {id:16,name:"Дима",role:"Игрок"},{id:17,name:"Настя",role:"Игрок"},{id:18,name:"Нияз",role:"Игрок"},
-  {id:19,name:"Ассет",role:"Игрок"},{id:20,name:"Алиса",role:"Гость"},{id:21,name:"Назли",role:"Гость"},
-  {id:22,name:"Иви",role:"Гость"},{id:23,name:"Никита",role:"Гость"},{id:24,name:"Данил",role:"Гость"}
-];
-const SEP={
-  1:{a:["Был","Был","Был","Не был","Не был"],p:["Сдал","Сдал","Сдал","Сдал","Сдал"],adj:-50,c:0},
-  2:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  3:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  4:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  5:{a:["Не был","Не был","Был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  6:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  7:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  8:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  9:{a:["Был","Не был","Не был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  10:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  11:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  12:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  13:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  14:{a:["Был","Не был","Был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  15:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  16:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  17:{a:["Был","Был","Был","Был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  18:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  19:{a:["Не был","Не был","Не был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  20:{a:["Был","Был","Был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  21:{a:["Не был","Не был","Был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  22:{a:["Не был","Не был","Был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  23:{a:["Не был","Не был","Был","Не был","Не был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0},
-  24:{a:["Не был","Не был","Не был","Не был","Был"],p:["Не сдал","Не сдал","Не сдал","Не сдал","Не сдал"],adj:0,c:0}
-};
+// ====================== НАСТРОЙКИ ======================
+const API_URL = 'https://script.google.com/macros/s/AKfycbxLR4RZ270NVZzgzkjtze-hwXSps33v6XS4tFJOONfAhFOGEGmsG-5S5mg5OYcq4EUC7w/exec';
 
-let S={players:[],months:{},cur:null};
+// ====================== СОСТОЯНИЕ ======================
+let months = [];
+let currentMonth = null;
+let monthData = null;
 
-function load(){
-  try{
-    const r=localStorage.getItem('vb2');
-    if(r){S=JSON.parse(r);return}
-  }catch(e){}
-  S.players=DEF.map(p=>({...p}));
-  S.months["2025-09"]={price:200,trainings:5,data:{}};
-  for(let id in SEP){
-    const d=SEP[id];
-    S.months["2025-09"].data[id]={att:d.a,pay:d.p,adj:d.adj,carryIn:d.c};
+// ====================== API ======================
+async function apiGet(params) {
+  const url = API_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Ошибка сети: ' + res.status);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+async function apiPost(body) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('Ошибка сети: ' + res.status);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+// ====================== РАСЧЁТЫ ======================
+function calcPlayer(p, price, trainings) {
+  const base = price * trainings;
+  const attCount = (p.att || []).filter(x => x === 'Был').length;
+  const missed = Math.max(trainings - attCount, 0);
+  const paid = (p.pay || []).filter(x => x === 'Сдал').length * price + (Number(p.adj) || 0);
+  const debt = base + (Number(p.carryIn) || 0) - paid;
+  const credit = (debt <= 0 && missed > 0) ? missed * price : 0;
+  const out = debt - credit;
+  const st = debt > 0
+    ? `долг: ${fmt(debt)} ₺`
+    : (credit > 0 ? `кредит +${fmt(credit)}` : 'оплачено');
+  return { attCount, missed, paid, base, debt, credit, out, st };
+}
+
+function fmt(n) {
+  return Math.round(Number(n) || 0).toLocaleString('ru-RU');
+}
+
+// ====================== UI ======================
+function show(v) {
+  document.getElementById('view-d').classList.toggle('hidden', v !== 'd');
+  document.getElementById('view-m').classList.toggle('hidden', v !== 'm');
+  document.getElementById('nav-d').classList.toggle('active', v === 'd');
+  document.getElementById('nav-m').classList.toggle('active', v === 'm');
+  if (v === 'd') renderDashboard();
+  if (v === 'm') renderMonthView();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = 1;
+  setTimeout(() => t.style.opacity = 0, 2200);
+}
+
+function renderDashboard() {
+  if (!monthData) {
+    document.getElementById('dash-loading').classList.remove('hidden');
+    document.getElementById('dash-content').classList.add('hidden');
+    return;
   }
-  S.cur="2025-09";
-  save();
-}
-function save(){try{localStorage.setItem('vb2',JSON.stringify(S))}catch(e){}}
-function fmt(n){return Math.round(n).toLocaleString('ru-RU')}
-function label(k){const[y,m]=k.split('-');return NAMES[+m-1]+' '+y}
+  document.getElementById('dash-loading').classList.add('hidden');
+  document.getElementById('dash-content').classList.remove('hidden');
 
-function calc(k,id){
-  const m=S.months[k];if(!m)return null;
-  const d=m.data[id]||{att:["","","","",""],pay:["","","","",""],adj:0,carryIn:0};
-  const price=m.price||200,tr=m.trainings||5,base=price*tr;
-  const att=d.att.filter(x=>x==="Был").length;
-  const miss=Math.max(tr-att,0);
-  const paid=d.pay.filter(x=>x==="Сдал").length*price+(d.adj||0);
-  const debt=base+(d.carryIn||0)-paid;
-  const credit=(debt<=0&&miss>0)?miss*price:0;
-  const out=debt-credit;
-  const st=debt>0?`долг: ${fmt(debt)} ₺`:(credit>0?`кредит +${fmt(credit)}`:'оплачено');
-  return{att,miss,paid,base,debt,credit,out,st};
-}
+  const price = monthData.price || 200;
+  const trainings = monthData.trainings || 5;
+  let totalDebt = 0, collected = 0, debtors = 0, attSum = 0, attPlayers = 0;
+  let html = '';
 
-function show(v){
-  ['d','m','p'].forEach(x=>{
-    document.getElementById('view-'+x).classList.toggle('hidden',x!==v);
-    document.getElementById('nav-'+x).classList.toggle('active',x===v);
-  });
-  if(v==='d')rendD();
-  if(v==='m')rendM();
-  if(v==='p')rendP();
-}
-function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.opacity=1;setTimeout(()=>e.style.opacity=0,2000)}
-
-function rendD(){
-  const k=S.cur;if(!k){return}
-  let debt=0,paid=0,cnt=0,attS=0,attN=0;
-  let html='';
-  S.players.forEach(p=>{
-    const c=calc(k,p.id);if(!c)return;
-    debt+=Math.max(c.debt,0);paid+=c.paid;
-    if(c.debt>0){
-      cnt++;
-      html+=`<div class="player-row"><div>${p.name}<span class="badge ${p.role==='Админ'?'admin':p.role==='Гость'?'guest':'player'}">${p.role}</span></div><span class="debt">${fmt(c.debt)} ₺</span></div>`;
+  (monthData.players || []).forEach(p => {
+    const c = calcPlayer(p, price, trainings);
+    totalDebt += Math.max(c.debt, 0);
+    collected += c.paid;
+    if (c.debt > 0) {
+      debtors++;
+      const roleClass = p.role === 'Админ' ? 'admin' : (p.role === 'Гость' ? 'guest' : 'player');
+      html += `<div class="player-row">
+        <div>${p.name}<span class="badge ${roleClass}">${p.role || ''}</span></div>
+        <span class="debt">${fmt(c.debt)} ₺</span>
+      </div>`;
     }
-    if(c.att+c.miss>0){attS+=c.att/(c.att+c.miss);attN++}
+    if (c.attCount + c.missed > 0) {
+      attSum += c.attCount / (c.attCount + c.missed);
+      attPlayers++;
+    }
   });
-  document.getElementById('s-debt').textContent=fmt(debt)+' ₺';
-  document.getElementById('s-paid').textContent=fmt(paid)+' ₺';
-  document.getElementById('s-cnt').textContent=cnt;
-  document.getElementById('s-att').textContent=attN?Math.round(attS/attN*100)+'%':'—';
-  document.getElementById('debt-list').innerHTML=html||'<div class="empty">Нет должников 🎉</div>';
-}
-function copyList(){
-  const k=S.cur;if(!k)return;
-  let t=`Должники (${label(k)}):\n\n`;
-  S.players.forEach(p=>{const c=calc(k,p.id);if(c&&c.debt>0)t+=`${p.name}: ${fmt(c.debt)} ₺\n`});
-  navigator.clipboard.writeText(t).then(()=>toast('Скопировано')).catch(()=>toast('Не удалось'));
+
+  document.getElementById('s-debt').textContent = fmt(totalDebt) + ' ₺';
+  document.getElementById('s-paid').textContent = fmt(collected) + ' ₺';
+  document.getElementById('s-cnt').textContent = debtors;
+  document.getElementById('s-att').textContent = attPlayers ? Math.round(attSum / attPlayers * 100) + '%' : '—';
+  document.getElementById('debt-list').innerHTML = html || '<div class="empty">Нет должников 🎉</div>';
 }
 
-function chgMonth(){S.cur=document.getElementById('month-sel').value;save();rendM()}
-function updSet(){
-  const m=S.months[S.cur];if(!m)return;
-  m.price=+document.getElementById('price').value||200;
-  m.trainings=+document.getElementById('trains').value||5;
-  document.getElementById('base').textContent=fmt(m.price*m.trainings)+' ₺';
-  save();rendM();
+function copyList() {
+  if (!monthData) return;
+  const price = monthData.price || 200;
+  const trainings = monthData.trainings || 5;
+  let text = `Должники (${currentMonth}):\n\n`;
+  (monthData.players || []).forEach(p => {
+    const c = calcPlayer(p, price, trainings);
+    if (c.debt > 0) text += `${p.name}: ${fmt(c.debt)} ₺\n`;
+  });
+  navigator.clipboard.writeText(text).then(() => toast('Список скопирован')).catch(() => toast('Не удалось скопировать'));
 }
-function rendM(){
-  const sel=document.getElementById('month-sel');
-  const keys=Object.keys(S.months).sort();
-  sel.innerHTML=keys.map(k=>`<option value="${k}" ${k===S.cur?'selected':''}>${label(k)}</option>`).join('');
-  const m=S.months[S.cur];if(!m)return;
-  document.getElementById('price').value=m.price;
-  document.getElementById('trains').value=m.trainings;
-  document.getElementById('base').textContent=fmt(m.price*m.trainings)+' ₺';
-  let html='';
-  S.players.forEach(p=>{
-    const d=m.data[p.id]||{att:["","","","",""],pay:["","","","",""],adj:0,carryIn:0};
-    while(d.att.length<5)d.att.push("");while(d.pay.length<5)d.pay.push("");
-    const c=calc(S.cur,p.id);
-    const attB=d.att.map((v,i)=>`<td><button class="toggle ${v==='Был'?'yes':v==='Не был'?'no':''}" onclick="togA(${p.id},${i})">${v==='Был'?'✓':v==='Не был'?'✗':'·'}</button></td>`).join('');
-    const payB=d.pay.map((v,i)=>`<td><button class="toggle ${v==='Сдал'?'yes':v==='Не сдал'?'no':''}" onclick="togP(${p.id},${i})">${v==='Сдал'?'✓':v==='Не сдал'?'✗':'·'}</button></td>`).join('');
-    html+=`<tr>
-      <td class="name"><b>${p.name}</b><br><span class="badge ${p.role==='Админ'?'admin':p.role==='Гость'?'guest':'player'}">${p.role}</span>${d.carryIn?`<div style="font-size:10px;color:#9ca3af">перенос ${fmt(d.carryIn)}</div>`:''}</td>
-      ${attB}${payB}
-      <td><input type="number" value="${d.adj||0}" onchange="setAdj(${p.id},this.value)"></td>
-      <td><div class="${c.debt>0?'debt':c.credit>0?'credit':'ok'}">${fmt(c.debt)} ₺</div><div style="font-size:10px;color:#9ca3af">${c.st}</div></td>
+
+function renderMonthView() {
+  const sel = document.getElementById('month-sel');
+  sel.innerHTML = months.map(m => `<option value="${m}" ${m === currentMonth ? 'selected' : ''}>${m}</option>`).join('');
+
+  if (!monthData) {
+    document.getElementById('month-loading').classList.remove('hidden');
+    document.getElementById('month-table-card').classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('month-loading').classList.add('hidden');
+  document.getElementById('month-error').classList.add('hidden');
+  document.getElementById('month-table-card').classList.remove('hidden');
+
+  const price = monthData.price || 200;
+  const trainings = monthData.trainings || 5;
+  document.getElementById('base').textContent = fmt(price * trainings) + ' ₺';
+
+  let html = '';
+  (monthData.players || []).forEach(p => {
+    const c = calcPlayer(p, price, trainings);
+    const roleClass = p.role === 'Админ' ? 'admin' : (p.role === 'Гость' ? 'guest' : 'player');
+
+    const attBtns = (p.att || ['','','','','']).map((v, i) => {
+      const cls = v === 'Был' ? 'yes' : (v === 'Не был' ? 'no' : '');
+      const symbol = v === 'Был' ? '✓' : (v === 'Не был' ? '✗' : '·');
+      return `<td><button class="toggle ${cls}" onclick="toggleAtt('${escapeName(p.name)}',${i+1},'${v}')">${symbol}</button></td>`;
+    }).join('');
+
+    const payBtns = (p.pay || ['','','','','']).map((v, i) => {
+      const cls = v === 'Сдал' ? 'yes' : (v === 'Не сдал' ? 'no' : '');
+      const symbol = v === 'Сдал' ? '✓' : (v === 'Не сдал' ? '✗' : '·');
+      return `<td><button class="toggle ${cls}" onclick="togglePay('${escapeName(p.name)}',${i+1},'${v}')">${symbol}</button></td>`;
+    }).join('');
+
+    html += `<tr>
+      <td class="name">
+        <b>${p.name}</b><br>
+        <span class="badge ${roleClass}">${p.role || ''}</span>
+        ${p.carryIn ? `<div style="font-size:10px;color:#9ca3af">перенос ${fmt(p.carryIn)}</div>` : ''}
+      </td>
+      ${attBtns}
+      ${payBtns}
+      <td><input type="number" value="${p.adj || 0}" onchange="setAdj('${escapeName(p.name)}', this.value)"></td>
+      <td>
+        <div class="${c.debt > 0 ? 'debt' : (c.credit > 0 ? 'credit' : 'ok')}">${fmt(c.debt)} ₺</div>
+        <div style="font-size:10px;color:#9ca3af">${c.st}</div>
+      </td>
     </tr>`;
   });
-  document.getElementById('tbody').innerHTML=html;
-}
-function ens(id){const m=S.months[S.cur];if(!m.data[id])m.data[id]={att:["","","","",""],pay:["","","","",""],adj:0,carryIn:0};return m.data[id]}
-function togA(id,w){const d=ens(id);const c=d.att[w];d.att[w]=c==="Был"?"Не был":(c==="Не был"?"":"Был");save();rendM()}
-function togP(id,w){const d=ens(id);const c=d.pay[w];d.pay[w]=c==="Сдал"?"Не сдал":(c==="Не сдал"?"":"Сдал");save();rendM()}
-function setAdj(id,v){ens(id).adj=+v||0;save();rendM()}
 
-function newMonth(){
-  const keys=Object.keys(S.months).sort();
-  let nk;
-  if(!keys.length){const n=new Date();nk=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`}
-  else{let[y,m]=keys[keys.length-1].split('-').map(Number);m++;if(m>12){m=1;y++}nk=`${y}-${String(m).padStart(2,'0')}`}
-  if(S.months[nk]){toast('Уже есть');return}
-  const prev=keys.length?S.months[keys[keys.length-1]]:null;
-  const data={};
-  S.players.forEach(p=>{
-    const c=prev?calc(keys[keys.length-1],p.id):null;
-    data[p.id]={att:["","","","",""],pay:["","","","",""],adj:0,carryIn:c?c.out:0};
-  });
-  S.months[nk]={price:prev?prev.price:200,trainings:prev?prev.trainings:5,data};
-  S.cur=nk;save();toast('Создан '+label(nk));show('m');
+  document.getElementById('tbody').innerHTML = html;
 }
 
-function rendP(){
-  document.getElementById('plist').innerHTML=S.players.map(p=>`
-    <div class="player-row">
-      <div>${p.name}<span class="badge ${p.role==='Админ'?'admin':p.role==='Гость'?'guest':'player'}">${p.role}</span></div>
-      <button class="btn danger" onclick="delP(${p.id})">Удалить</button>
-    </div>`).join('');
-}
-function addPlayer(){
-  const name=document.getElementById('new-name').value.trim();
-  if(!name){toast('Введите имя');return}
-  const role=document.getElementById('new-role').value;
-  const id=S.players.reduce((a,p)=>Math.max(a,p.id),0)+1;
-  S.players.push({id,name,role});
-  Object.values(S.months).forEach(m=>{m.data[id]={att:["","","","",""],pay:["","","","",""],adj:0,carryIn:0}});
-  document.getElementById('new-name').value='';save();rendP();toast('Добавлен');
-}
-function delP(id){if(!confirm('Удалить?'))return;S.players=S.players.filter(p=>p.id!==id);Object.values(S.months).forEach(m=>delete m.data[id]);save();rendP();toast('Удалён')}
-
-function exportCSV(){
-  const k=S.cur;if(!k)return;const m=S.months[k];
-  let csv='\uFEFFИмя;Роль;Перенос;Посещ;Пропущ;Оплачено;Корр;Долг;Кредит;Перенос_след\n';
-  S.players.forEach(p=>{
-    const d=m.data[p.id]||{adj:0,carryIn:0};const c=calc(k,p.id);
-    csv+=`${p.name};${p.role};${d.carryIn||0};${c.att};${c.miss};${c.paid};${d.adj||0};${c.debt};${c.credit};${c.out}\n`;
-  });
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`voleybol_${k}.csv`;a.click();
-  toast('Скачано');
+function escapeName(name) {
+  return String(name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
-load();
-show('d');
+async function toggleAtt(playerName, week, currentValue) {
+  let next = '';
+  if (currentValue === 'Был') next = 'Не был';
+  else if (currentValue === 'Не был') next = '';
+  else next = 'Был';
+
+  try {
+    toast('Сохраняю...');
+    await apiPost({
+      month: currentMonth,
+      player: playerName,
+      type: 'att',
+      week: week,
+      value: next
+    });
+    const p = monthData.players.find(x => x.name === playerName);
+    if (p) p.att[week - 1] = next;
+    renderMonthView();
+    renderDashboard();
+    toast('Сохранено');
+  } catch (err) {
+    toast('Ошибка: ' + err.message);
+  }
+}
+
+async function togglePay(playerName, week, currentValue) {
+  let next = '';
+  if (currentValue === 'Сдал') next = 'Не сдал';
+  else if (currentValue === 'Не сдал') next = '';
+  else next = 'Сдал';
+
+  try {
+    toast('Сохраняю...');
+    await apiPost({
+      month: currentMonth,
+      player: playerName,
+      type: 'pay',
+      week: week,
+      value: next
+    });
+    const p = monthData.players.find(x => x.name === playerName);
+    if (p) p.pay[week - 1] = next;
+    renderMonthView();
+    renderDashboard();
+    toast('Сохранено');
+  } catch (err) {
+    toast('Ошибка: ' + err.message);
+  }
+}
+
+async function setAdj(playerName, value) {
+  try {
+    await apiPost({
+      month: currentMonth,
+      player: playerName,
+      type: 'adj',
+      value: Number(value) || 0
+    });
+    const p = monthData.players.find(x => x.name === playerName);
+    if (p) p.adj = Number(value) || 0;
+    renderMonthView();
+    renderDashboard();
+    toast('Корректировка сохранена');
+  } catch (err) {
+    toast('Ошибка: ' + err.message);
+  }
+}
+
+async function changeMonth() {
+  currentMonth = document.getElementById('month-sel').value;
+  await loadMonth(currentMonth);
+}
+
+async function loadMonth(name) {
+  document.getElementById('month-loading').classList.remove('hidden');
+  document.getElementById('month-table-card').classList.add('hidden');
+  document.getElementById('month-error').classList.add('hidden');
+
+  try {
+    monthData = await apiGet({ action: 'month', name: name });
+    currentMonth = name;
+    renderMonthView();
+    renderDashboard();
+  } catch (err) {
+    document.getElementById('month-loading').classList.add('hidden');
+    document.getElementById('month-error').textContent = 'Ошибка загрузки: ' + err.message;
+    document.getElementById('month-error').classList.remove('hidden');
+  }
+}
+
+async function reloadAll() {
+  toast('Обновляю...');
+  try {
+    const data = await apiGet({ action: 'months' });
+    months = data.months || [];
+    if (!currentMonth && months.length) currentMonth = months[0];
+    if (currentMonth) await loadMonth(currentMonth);
+    toast('Данные обновлены');
+  } catch (err) {
+    toast('Ошибка: ' + err.message);
+  }
+}
+
+async function init() {
+  try {
+    const data = await apiGet({ action: 'months' });
+    months = data.months || [];
+    if (months.length === 0) {
+      document.getElementById('dash-loading').textContent = 'Нет месяцев в таблице';
+      return;
+    }
+    currentMonth = months.includes('Сентябрь') ? 'Сентябрь' : months[0];
+    await loadMonth(currentMonth);
+    show('d');
+  } catch (err) {
+    document.getElementById('dash-loading').innerHTML = `
+      <div style="color:#dc2626">Ошибка подключения к таблице</div>
+      <div style="font-size:13px;margin-top:8px">${err.message}</div>
+      <button class="btn primary" style="margin-top:12px" onclick="init()">Повторить</button>
+    `;
+  }
+}
+
+init();
 </script>
 </body>
 </html>

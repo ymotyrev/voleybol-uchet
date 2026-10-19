@@ -180,7 +180,9 @@ function calcPlayer(p, price, trainings) {
   return { attCount, missed, paid, debt, credit, st };
 }
 
-function fmt(n) { return Math.round(Number(n) || 0).toLocaleString('ru-RU'); }
+function fmt(n) {
+  return Math.round(Number(n) || 0).toLocaleString('ru-RU');
+}
 
 function show(v) {
   document.getElementById('view-d').classList.toggle('hidden', v !== 'd');
@@ -255,6 +257,7 @@ function renderMonthView() {
     document.getElementById('month-table-card').classList.add('hidden');
     return;
   }
+
   document.getElementById('month-loading').classList.add('hidden');
   document.getElementById('month-error').classList.add('hidden');
   document.getElementById('month-table-card').classList.remove('hidden');
@@ -281,18 +284,27 @@ function renderMonthView() {
     }).join('');
 
     html += `<tr>
-      <td class="name"><b>${p.name}</b><br><span class="badge ${roleClass}">${p.role||''}</span>
-      ${p.carryIn?`<div style="font-size:10px;color:#9ca3af">перенос ${fmt(p.carryIn)}</div>`:''}</td>
-      ${attBtns}${payBtns}
+      <td class="name">
+        <b>${p.name}</b><br>
+        <span class="badge ${roleClass}">${p.role||''}</span>
+        ${p.carryIn ? `<div style="font-size:10px;color:#9ca3af">перенос ${fmt(p.carryIn)}</div>` : ''}
+      </td>
+      ${attBtns}
+      ${payBtns}
       <td><input type="number" value="${p.adj||0}" onchange="setAdj('${esc(p.name)}',this.value)"></td>
-      <td><div class="${c.debt>0?'debt':(c.credit>0?'credit':'ok')}">${fmt(c.debt)} ₺</div>
-      <div style="font-size:10px;color:#9ca3af">${c.st}</div></td>
+      <td>
+        <div class="${c.debt>0?'debt':(c.credit>0?'credit':'ok')}">${fmt(c.debt)} ₺</div>
+        <div style="font-size:10px;color:#9ca3af">${c.st}</div>
+      </td>
     </tr>`;
   });
+
   document.getElementById('tbody').innerHTML = html;
 }
 
-function esc(n){ return String(n).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function esc(n) {
+  return String(n).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
 
 async function toggleAtt(player, week, cur) {
   const next = cur==='Был' ? 'Не был' : (cur==='Не был' ? '' : 'Был');
@@ -301,9 +313,12 @@ async function toggleAtt(player, week, cur) {
     await apiPost({ month: currentMonth, player, type: 'att', week, value: next });
     const p = monthData.players.find(x => x.name === player);
     if (p) p.att[week-1] = next;
-    renderMonthView(); renderDashboard();
+    renderMonthView();
+    renderDashboard();
     toast('Сохранено');
-  } catch(e){ toast('Ошибка: '+e.message); }
+  } catch(e) {
+    toast('Ошибка: ' + e.message);
+  }
 }
 
 async function togglePay(player, week, cur) {
@@ -313,9 +328,12 @@ async function togglePay(player, week, cur) {
     await apiPost({ month: currentMonth, player, type: 'pay', week, value: next });
     const p = monthData.players.find(x => x.name === player);
     if (p) p.pay[week-1] = next;
-    renderMonthView(); renderDashboard();
+    renderMonthView();
+    renderDashboard();
     toast('Сохранено');
-  } catch(e){ toast('Ошибка: '+e.message); }
+  } catch(e) {
+    toast('Ошибка: ' + e.message);
+  }
 }
 
 async function setAdj(player, value) {
@@ -323,9 +341,12 @@ async function setAdj(player, value) {
     await apiPost({ month: currentMonth, player, type: 'adj', value: Number(value)||0 });
     const p = monthData.players.find(x => x.name === player);
     if (p) p.adj = Number(value)||0;
-    renderMonthView(); renderDashboard();
+    renderMonthView();
+    renderDashboard();
     toast('Корректировка сохранена');
-  } catch(e){ toast('Ошибка: '+e.message); }
+  } catch(e) {
+    toast('Ошибка: ' + e.message);
+  }
 }
 
 async function changeMonth() {
@@ -340,7 +361,8 @@ async function loadMonth(name) {
   try {
     monthData = await apiGet({ action: 'month', name });
     currentMonth = name;
-    renderMonthView(); renderDashboard();
+    renderMonthView();
+    renderDashboard();
   } catch(e) {
     document.getElementById('month-loading').classList.add('hidden');
     document.getElementById('month-error').textContent = 'Ошибка: ' + e.message;
@@ -371,7 +393,9 @@ async function reloadAll() {
     if (!currentMonth && months.length) currentMonth = months[0];
     if (currentMonth) await loadMonth(currentMonth);
     toast('Обновлено');
-  } catch(e){ toast('Ошибка: '+e.message); }
+  } catch(e) {
+    toast('Ошибка: ' + e.message);
+  }
 }
 
 async function init() {

@@ -269,12 +269,26 @@ function copyList() {
   if (!monthData) return;
   const price = monthData.price || 200;
   const trainings = monthData.trainings || 5;
-  let text = `Должники (${currentMonth}):\n\n`;
+  let text = `Сумма к оплате (${currentMonth}):\n\n`;
+
   (monthData.players || []).forEach(p => {
     const c = calcPlayer(p, price, trainings);
-    if (c.debt > 0) text += `${p.name}: ${fmt(c.debt)} ₺\n`;
+    if (c.debt > 0) {
+      const reasons = [];
+      if (c.missed > 0) {
+        reasons.push(c.missed === 1 ? 'пропуск 1 игры' : `пропуск ${c.missed} игр`);
+      }
+      if (p.carryIn > 0) {
+        reasons.push('перенос с прошлого');
+      }
+      const reasonText = reasons.length ? ` (${reasons.join(', ')})` : '';
+      text += `${p.name}: ${fmt(c.debt)} ₺${reasonText}\n`;
+    }
   });
-  navigator.clipboard.writeText(text).then(() => toast('Список скопирован')).catch(() => toast('Не удалось'));
+
+  navigator.clipboard.writeText(text)
+    .then(() => toast('Список скопирован'))
+    .catch(() => toast('Не удалось'));
 }
 
 function renderMonthView() {

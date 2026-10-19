@@ -5,68 +5,104 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Волейбол Учет</title>
 <style>
+:root {
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --header: #0f172a;
+  --accent: #059669;
+  --accent-hover: #047857;
+  --border: #e2e8f0;
+  --debt: #dc2626;
+  --ok: #16a34a;
+  --credit: #2563eb;
+  --att-yes: #22c55e;
+  --att-no: #f97316;
+  --pay-yes: #0d9488;
+  --pay-no: #e11d48;
+  --shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --header: #020617;
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --border: #334155;
+  --debt: #f87171;
+  --ok: #4ade80;
+  --credit: #60a5fa;
+  --att-yes: #22c55e;
+  --att-no: #fb923c;
+  --pay-yes: #14b8a6;
+  --pay-no: #f43f5e;
+  --shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6;color:#111;min-height:100vh;padding-bottom:90px}
-header{background:#1e40af;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px;transition:background .2s,color .2s}
+header{background:var(--header);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
 header h1{font-size:17px;font-weight:700}
-header p{font-size:11px;opacity:.85}
-.nav{display:flex;gap:6px}
-.nav button{background:rgba(255,255,255,.15);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-size:13px;font-weight:500}
-.nav button.active{background:rgba(255,255,255,.35)}
+header p{font-size:11px;opacity:.8}
+.nav{display:flex;gap:6px;align-items:center}
+.nav button{background:rgba(255,255,255,.12);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-size:13px;font-weight:500}
+.nav button.active{background:var(--accent)}
+.theme-btn{background:rgba(255,255,255,.12);border:none;color:#fff;width:36px;height:36px;border-radius:8px;font-size:16px;display:flex;align-items:center;justify-content:center}
 main{max-width:960px;margin:0 auto;padding:12px}
-.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px;overflow:hidden}
-.card-h{padding:12px 16px;border-bottom:1px solid #eee;font-weight:600;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;border:1px solid var(--border)}
+.card-h{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.stat{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.stat .l{font-size:11px;color:#6b7280}
+.stat{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.stat .l{font-size:11px;color:var(--muted)}
 .stat .v{font-size:20px;font-weight:700;margin-top:2px}
-.stat .v.red{color:#dc2626}
-.stat .v.green{color:#16a34a}
-.btn{display:inline-block;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:#e5e7eb;color:#111}
-.btn.primary{background:#1e40af;color:#fff}
+.stat .v.red{color:var(--debt)}
+.stat .v.green{color:var(--ok)}
+.btn{display:inline-block;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:var(--border);color:var(--text)}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.primary:active{background:var(--accent-hover)}
 .btn-row{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
-.player-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f3f4f6}
+.player-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
 .player-row:last-child{border-bottom:none}
 .badge{font-size:11px;padding:2px 6px;border-radius:4px;margin-left:6px}
 .badge.admin{background:#ede9fe;color:#5b21b6}
 .badge.player{background:#dbeafe;color:#1e40af}
 .badge.guest{background:#fce7f3;color:#9d174d}
-.debt{color:#dc2626;font-weight:600}
-.ok{color:#16a34a}
-.credit{color:#2563eb}
+[data-theme="dark"] .badge.admin{background:#4c1d95;color:#e9d5ff}
+[data-theme="dark"] .badge.player{background:#1e3a8a;color:#bfdbfe}
+[data-theme="dark"] .badge.guest{background:#9d174d;color:#fbcfe8}
+.debt{color:var(--debt);font-weight:600}
+.ok{color:var(--ok)}
+.credit{color:var(--credit)}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#f9fafb;padding:8px 3px;font-weight:500;color:#6b7280;text-align:center;font-size:11px}
-td{padding:6px 2px;text-align:center;border-top:1px solid #f3f4f6}
+th{background:var(--bg);padding:8px 3px;font-weight:500;color:var(--muted);text-align:center;font-size:11px}
+td{padding:6px 2px;text-align:center;border-top:1px solid var(--border)}
 td.name{text-align:left;padding-left:8px;min-width:100px}
-
-/* Посещение — круглые зелёный/оранжевый */
-.toggle-att{width:30px;height:30px;border-radius:50%;border:1px solid #d1d5db;background:#f3f4f6;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
-.toggle-att.yes{background:#22c55e;color:#fff;border-color:#16a34a}
-.toggle-att.no{background:#f97316;color:#fff;border-color:#ea580c}
-
-/* Оплата — квадратные ФИОЛЕТОВЫЙ / РОЗОВЫЙ */
-.toggle-pay{width:30px;height:30px;border-radius:6px;border:1px solid #d1d5db;background:#f3f4f6;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
-.toggle-pay.yes{background:#0d9488;color:#fff;border-color:#0f766e}
-.toggle-pay.no{background:#e11d48;color:#fff;border-color:#be123c}
-
-input[type=number],input[type=text],select{padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
-input[type=number]{width:68px;text-align:center;padding:6px 4px}
+.toggle-att{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:13px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted)}
+.toggle-att.yes{background:var(--att-yes);color:#fff;border-color:var(--att-yes)}
+.toggle-att.no{background:var(--att-no);color:#fff;border-color:var(--att-no)}
+.toggle-pay{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--bg);font-size:13px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted)}
+.toggle-pay.yes{background:var(--pay-yes);color:#fff;border-color:var(--pay-yes)}
+.toggle-pay.no{background:var(--pay-no);color:#fff;border-color:var(--pay-no)}
+input[type=number],input[type=text],select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--card);color:var(--text)}
+input[type=number]{width:52px;text-align:center}
 .form-row{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;align-items:flex-end}
-.form-row label{font-size:11px;color:#6b7280;display:block;margin-bottom:3px}
+.form-row label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px}
 .hidden{display:none!important}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;z-index:100;pointer-events:none;max-width:90%}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.empty{padding:24px;text-align:center;color:#9ca3af}
-.loading{padding:40px;text-align:center;color:#6b7280}
-.error{padding:20px;text-align:center;color:#dc2626;background:#fef2f2;border-radius:12px;margin:12px}
-.legend{display:flex;gap:12px;flex-wrap:wrap;padding:10px 16px;font-size:12px;color:#6b7280;border-top:1px solid #eee}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.loading{padding:40px;text-align:center;color:var(--muted)}
+.error{padding:20px;text-align:center;color:var(--debt);background:rgba(220,38,38,.1);border-radius:12px;margin:12px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:10px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
 .legend span{display:flex;align-items:center;gap:5px}
-.add-form{padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;border-top:1px solid #eee}
+.add-form{padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;border-top:1px solid var(--border)}
 @media (max-width:480px){
-  .stats{grid-template-columns:1fr 1fr}
   .stat .v{font-size:18px}
   .toggle-att,.toggle-pay{width:32px;height:32px}
-  td.name{min-width:90px;font-size:12px}
 }
 </style>
 </head>
@@ -79,6 +115,7 @@ input[type=number]{width:68px;text-align:center;padding:6px 4px}
   <div class="nav">
     <button id="nav-d" class="active" onclick="show('d')">Дашборд</button>
     <button id="nav-m" onclick="show('m')">Месяц</button>
+    <button class="theme-btn" onclick="toggleTheme()" title="Тема">🌓</button>
   </div>
 </header>
 
@@ -93,7 +130,7 @@ input[type=number]{width:68px;text-align:center;padding:6px 4px}
         <div class="stat"><div class="l">Посещаемость</div><div class="v" id="s-att">0%</div></div>
       </div>
       <div class="card">
-        <div class="card-h">Должники <button class="btn" onclick="copyList()">📋 Копировать</button></div>
+        <div class="card-h">Сумма к оплате <button class="btn" onclick="copyList()">📋 Копировать</button></div>
         <div id="debt-list"></div>
       </div>
       <div class="card">
@@ -119,10 +156,8 @@ input[type=number]{width:68px;text-align:center;padding:6px 4px}
         </div>
       </div>
     </div>
-
     <div id="month-loading" class="loading hidden">Загрузка месяца...</div>
     <div id="month-error" class="error hidden"></div>
-
     <div class="card" id="month-table-card">
       <div class="scroll">
         <table>
@@ -150,8 +185,6 @@ input[type=number]{width:68px;text-align:center;padding:6px 4px}
         <span><span class="toggle-pay yes" style="width:18px;height:18px;font-size:10px">✓</span> Сдал</span>
         <span><span class="toggle-pay no" style="width:18px;height:18px;font-size:10px">✗</span> Не сдал</span>
       </div>
-
-      <!-- Добавление игрока -->
       <div class="add-form">
         <div>
           <label>Имя нового игрока</label>
@@ -179,6 +212,19 @@ let months = [];
 let currentMonth = null;
 let monthData = null;
 
+// Тема
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+}
+initTheme();
+
 async function apiGet(params) {
   const url = API_URL + '?' + new URLSearchParams(params).toString();
   const res = await fetch(url);
@@ -187,7 +233,6 @@ async function apiGet(params) {
   if (data.error) throw new Error(data.error);
   return data;
 }
-
 async function apiPost(body) {
   const res = await fetch(API_URL, {
     method: 'POST',
@@ -210,7 +255,6 @@ function calcPlayer(p, price, trainings) {
   const st = debt > 0 ? `долг: ${fmt(debt)} ₺` : (credit > 0 ? `кредит +${fmt(credit)}` : 'оплачено');
   return { attCount, missed, paid, debt, credit, st };
 }
-
 function fmt(n) { return Math.round(Number(n) || 0).toLocaleString('ru-RU'); }
 
 function show(v) {
@@ -221,7 +265,6 @@ function show(v) {
   if (v === 'd') renderDashboard();
   if (v === 'm') renderMonthView();
 }
-
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -237,12 +280,10 @@ function renderDashboard() {
   }
   document.getElementById('dash-loading').classList.add('hidden');
   document.getElementById('dash-content').classList.remove('hidden');
-
   const price = monthData.price || 200;
   const trainings = monthData.trainings || 5;
   let totalDebt = 0, collected = 0, debtors = 0, attSum = 0, attPlayers = 0;
   let html = '';
-
   (monthData.players || []).forEach(p => {
     const c = calcPlayer(p, price, trainings);
     totalDebt += Math.max(c.debt, 0);
@@ -257,12 +298,11 @@ function renderDashboard() {
       attPlayers++;
     }
   });
-
   document.getElementById('s-debt').textContent = fmt(totalDebt) + ' ₺';
   document.getElementById('s-paid').textContent = fmt(collected) + ' ₺';
   document.getElementById('s-cnt').textContent = debtors;
   document.getElementById('s-att').textContent = attPlayers ? Math.round(attSum / attPlayers * 100) + '%' : '—';
-  document.getElementById('debt-list').innerHTML = html || '<div class="empty">Нет должников 🎉</div>';
+  document.getElementById('debt-list').innerHTML = html || '<div class="empty">Нет сумм к оплате 🎉</div>';
 }
 
 function copyList() {
@@ -270,31 +310,22 @@ function copyList() {
   const price = monthData.price || 200;
   const trainings = monthData.trainings || 5;
   let text = `Сумма к оплате (${currentMonth}):\n\n`;
-
   (monthData.players || []).forEach(p => {
     const c = calcPlayer(p, price, trainings);
     if (c.debt > 0) {
       const reasons = [];
-      if (c.missed > 0) {
-        reasons.push(c.missed === 1 ? 'пропуск 1 игры' : `пропуск ${c.missed} игр`);
-      }
-      if (p.carryIn > 0) {
-        reasons.push('перенос с прошлого');
-      }
+      if (c.missed > 0) reasons.push(c.missed === 1 ? 'пропуск 1 игры' : `пропуск ${c.missed} игр`);
+      if (p.carryIn > 0) reasons.push('перенос с прошлого');
       const reasonText = reasons.length ? ` (${reasons.join(', ')})` : '';
       text += `${p.name}: ${fmt(c.debt)} ₺${reasonText}\n`;
     }
   });
-
-  navigator.clipboard.writeText(text)
-    .then(() => toast('Список скопирован'))
-    .catch(() => toast('Не удалось'));
+  navigator.clipboard.writeText(text).then(() => toast('Список скопирован')).catch(() => toast('Не удалось'));
 }
 
 function renderMonthView() {
   const sel = document.getElementById('month-sel');
   sel.innerHTML = months.map(m => `<option value="${m}" ${m===currentMonth?'selected':''}>${m}</option>`).join('');
-
   if (!monthData) {
     document.getElementById('month-loading').classList.remove('hidden');
     document.getElementById('month-table-card').classList.add('hidden');
@@ -303,35 +334,30 @@ function renderMonthView() {
   document.getElementById('month-loading').classList.add('hidden');
   document.getElementById('month-error').classList.add('hidden');
   document.getElementById('month-table-card').classList.remove('hidden');
-
   const price = monthData.price || 200;
   const trainings = monthData.trainings || 5;
   document.getElementById('base').textContent = fmt(price * trainings) + ' ₺';
-
   let html = '';
   (monthData.players || []).forEach(p => {
     const c = calcPlayer(p, price, trainings);
     const roleClass = p.role === 'Админ' ? 'admin' : (p.role === 'Гость' ? 'guest' : 'player');
-
     const attBtns = (p.att || ['','','','','']).map((v,i) => {
       const cls = v==='Был'?'yes':(v==='Не был'?'no':'');
       const sym = v==='Был'?'✓':(v==='Не был'?'✗':'·');
       return `<td><button class="toggle-att ${cls}" onclick="toggleAtt('${esc(p.name)}',${i+1},'${v}')">${sym}</button></td>`;
     }).join('');
-
     const payBtns = (p.pay || ['','','','','']).map((v,i) => {
       const cls = v==='Сдал'?'yes':(v==='Не сдал'?'no':'');
       const sym = v==='Сдал'?'✓':(v==='Не сдал'?'✗':'·');
       return `<td><button class="toggle-pay ${cls}" onclick="togglePay('${esc(p.name)}',${i+1},'${v}')">${sym}</button></td>`;
     }).join('');
-
     html += `<tr>
       <td class="name"><b>${p.name}</b><br><span class="badge ${roleClass}">${p.role||''}</span>
-      ${p.carryIn?`<div style="font-size:10px;color:#9ca3af">перенос ${fmt(p.carryIn)}</div>`:''}</td>
+      ${p.carryIn?`<div style="font-size:10px;color:var(--muted)">перенос ${fmt(p.carryIn)}</div>`:''}</td>
       ${attBtns}${payBtns}
       <td><input type="number" value="${p.adj||0}" onchange="setAdj('${esc(p.name)}',this.value)"></td>
       <td><div class="${c.debt>0?'debt':(c.credit>0?'credit':'ok')}">${fmt(c.debt)} ₺</div>
-      <div style="font-size:10px;color:#9ca3af">${c.st}</div></td>
+      <div style="font-size:10px;color:var(--muted)">${c.st}</div></td>
     </tr>`;
   });
   document.getElementById('tbody').innerHTML = html;
@@ -350,7 +376,6 @@ async function toggleAtt(player, week, cur) {
     toast('Сохранено');
   } catch(e){ toast('Ошибка: '+e.message); }
 }
-
 async function togglePay(player, week, cur) {
   const next = cur==='Сдал' ? 'Не сдал' : (cur==='Не сдал' ? '' : 'Сдал');
   try {
@@ -362,7 +387,6 @@ async function togglePay(player, week, cur) {
     toast('Сохранено');
   } catch(e){ toast('Ошибка: '+e.message); }
 }
-
 async function setAdj(player, value) {
   try {
     await apiPost({ month: currentMonth, player, type: 'adj', value: Number(value)||0 });
@@ -372,28 +396,22 @@ async function setAdj(player, value) {
     toast('Корректировка сохранена');
   } catch(e){ toast('Ошибка: '+e.message); }
 }
-
 async function addPlayer() {
   const name = document.getElementById('new-player-name').value.trim();
   const role = document.getElementById('new-player-role').value;
   if (!name) { toast('Введите имя'); return; }
-
   try {
     toast('Добавляю...');
-    await apiPost({ action: 'addPlayer', month: currentMonth, player: name, role: role });
+    await apiPost({ action: 'addPlayer', month: currentMonth, player: name, role });
     document.getElementById('new-player-name').value = '';
     toast('Игрок добавлен');
     await loadMonth(currentMonth);
-  } catch(e) {
-    toast('Ошибка: ' + e.message);
-  }
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
-
 async function changeMonth() {
   currentMonth = document.getElementById('month-sel').value;
   await loadMonth(currentMonth);
 }
-
 async function loadMonth(name) {
   document.getElementById('month-loading').classList.remove('hidden');
   document.getElementById('month-table-card').classList.add('hidden');
@@ -408,7 +426,6 @@ async function loadMonth(name) {
     document.getElementById('month-error').classList.remove('hidden');
   }
 }
-
 async function createNextMonth() {
   if (!confirm('Создать следующий месяц и перенести долги?')) return;
   try {
@@ -419,11 +436,8 @@ async function createNextMonth() {
     currentMonth = res.month;
     await loadMonth(currentMonth);
     show('m');
-  } catch(e) {
-    toast('Ошибка: ' + e.message);
-  }
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
-
 async function reloadAll() {
   toast('Обновляю...');
   try {
@@ -434,7 +448,6 @@ async function reloadAll() {
     toast('Обновлено');
   } catch(e){ toast('Ошибка: '+e.message); }
 }
-
 async function init() {
   try {
     const data = await apiGet({ action: 'months' });
@@ -448,12 +461,11 @@ async function init() {
     show('d');
   } catch(e) {
     document.getElementById('dash-loading').innerHTML = `
-      <div style="color:#dc2626">Ошибка подключения</div>
+      <div style="color:var(--debt)">Ошибка подключения</div>
       <div style="font-size:13px;margin-top:8px">${e.message}</div>
       <button class="btn primary" style="margin-top:12px" onclick="init()">Повторить</button>`;
   }
 }
-
 init();
 </script>
 </body>

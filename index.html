@@ -6,23 +6,23 @@
 <title>Волейбол Учет</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6;color:#111;min-height:100vh;padding-bottom:80px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6;color:#111;min-height:100vh;padding-bottom:90px}
 header{background:#1e40af;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
-header h1{font-size:18px;font-weight:700}
+header h1{font-size:17px;font-weight:700}
 header p{font-size:11px;opacity:.85}
 .nav{display:flex;gap:6px}
-.nav button{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500}
+.nav button{background:rgba(255,255,255,.15);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-size:13px;font-weight:500}
 .nav button.active{background:rgba(255,255,255,.35)}
 main{max-width:960px;margin:0 auto;padding:12px}
 .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px;overflow:hidden}
-.card-h{padding:12px 16px;border-bottom:1px solid #eee;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.card-h{padding:12px 16px;border-bottom:1px solid #eee;font-weight:600;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .stat{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .stat .l{font-size:11px;color:#6b7280}
-.stat .v{font-size:22px;font-weight:700;margin-top:2px}
+.stat .v{font-size:20px;font-weight:700;margin-top:2px}
 .stat .v.red{color:#dc2626}
 .stat .v.green{color:#16a34a}
-.btn{display:inline-block;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:#e5e7eb;color:#111}
+.btn{display:inline-block;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:#e5e7eb;color:#111}
 .btn.primary{background:#1e40af;color:#fff}
 .btn-row{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
 .player-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f3f4f6}
@@ -35,27 +35,39 @@ main{max-width:960px;margin:0 auto;padding:12px}
 .ok{color:#16a34a}
 .credit{color:#2563eb}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#f9fafb;padding:8px 4px;font-weight:500;color:#6b7280;text-align:center;font-size:11px}
+th{background:#f9fafb;padding:8px 3px;font-weight:500;color:#6b7280;text-align:center;font-size:11px}
 td{padding:6px 2px;text-align:center;border-top:1px solid #f3f4f6}
-td.name{text-align:left;padding-left:8px;min-width:110px}
-.toggle-att{width:28px;height:28px;border-radius:50%;border:1px solid #d1d5db;background:#f3f4f6;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+td.name{text-align:left;padding-left:8px;min-width:100px}
+
+/* Посещение — круглые зелёный/оранжевый */
+.toggle-att{width:30px;height:30px;border-radius:50%;border:1px solid #d1d5db;background:#f3f4f6;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
 .toggle-att.yes{background:#22c55e;color:#fff;border-color:#16a34a}
 .toggle-att.no{background:#f97316;color:#fff;border-color:#ea580c}
-.toggle-pay{width:28px;height:28px;border-radius:6px;border:1px solid #d1d5db;background:#f3f4f6;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
-.toggle-pay.yes{background:#3b82f6;color:#fff;border-color:#2563eb}
-.toggle-pay.no{background:#ef4444;color:#fff;border-color:#dc2626}
-input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius:6px;text-align:center;font-size:12px}
+
+/* Оплата — квадратные ФИОЛЕТОВЫЙ / РОЗОВЫЙ */
+.toggle-pay{width:30px;height:30px;border-radius:6px;border:1px solid #d1d5db;background:#f3f4f6;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.toggle-pay.yes{background:#7c3aed;color:#fff;border-color:#6d28d9}   /* фиолетовый = Сдал */
+.toggle-pay.no{background:#ec4899;color:#fff;border-color:#db2777}    /* розовый = Не сдал */
+
+input[type=number],input[type=text],select{padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
+input[type=number]{width:52px;text-align:center}
 .form-row{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;align-items:flex-end}
 .form-row label{font-size:11px;color:#6b7280;display:block;margin-bottom:3px}
-.form-row select{padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
 .hidden{display:none!important}
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;z-index:100;pointer-events:none}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;z-index:100;pointer-events:none;max-width:90%}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .empty{padding:24px;text-align:center;color:#9ca3af}
 .loading{padding:40px;text-align:center;color:#6b7280}
 .error{padding:20px;text-align:center;color:#dc2626;background:#fef2f2;border-radius:12px;margin:12px}
-.legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 16px;font-size:12px;color:#6b7280;border-top:1px solid #eee}
-.legend span{display:flex;align-items:center;gap:6px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:10px 16px;font-size:12px;color:#6b7280;border-top:1px solid #eee}
+.legend span{display:flex;align-items:center;gap:5px}
+.add-form{padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;border-top:1px solid #eee}
+@media (max-width:480px){
+  .stats{grid-template-columns:1fr 1fr}
+  .stat .v{font-size:18px}
+  .toggle-att,.toggle-pay{width:32px;height:32px}
+  td.name{min-width:90px;font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -107,8 +119,10 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
         </div>
       </div>
     </div>
+
     <div id="month-loading" class="loading hidden">Загрузка месяца...</div>
     <div id="month-error" class="error hidden"></div>
+
     <div class="card" id="month-table-card">
       <div class="scroll">
         <table>
@@ -135,6 +149,23 @@ input[type=number]{width:52px;padding:4px;border:1px solid #d1d5db;border-radius
         <span><span class="toggle-att no" style="width:18px;height:18px;font-size:10px">✗</span> Не был</span>
         <span><span class="toggle-pay yes" style="width:18px;height:18px;font-size:10px">✓</span> Сдал</span>
         <span><span class="toggle-pay no" style="width:18px;height:18px;font-size:10px">✗</span> Не сдал</span>
+      </div>
+
+      <!-- Добавление игрока -->
+      <div class="add-form">
+        <div>
+          <label>Имя нового игрока</label>
+          <input type="text" id="new-player-name" placeholder="Имя" style="width:140px">
+        </div>
+        <div>
+          <label>Роль</label>
+          <select id="new-player-role">
+            <option value="Игрок">Игрок</option>
+            <option value="Админ">Админ</option>
+            <option value="Гость">Гость</option>
+          </select>
+        </div>
+        <button class="btn primary" onclick="addPlayer()">+ Добавить</button>
       </div>
     </div>
   </div>
@@ -180,9 +211,7 @@ function calcPlayer(p, price, trainings) {
   return { attCount, missed, paid, debt, credit, st };
 }
 
-function fmt(n) {
-  return Math.round(Number(n) || 0).toLocaleString('ru-RU');
-}
+function fmt(n) { return Math.round(Number(n) || 0).toLocaleString('ru-RU'); }
 
 function show(v) {
   document.getElementById('view-d').classList.toggle('hidden', v !== 'd');
@@ -257,7 +286,6 @@ function renderMonthView() {
     document.getElementById('month-table-card').classList.add('hidden');
     return;
   }
-
   document.getElementById('month-loading').classList.add('hidden');
   document.getElementById('month-error').classList.add('hidden');
   document.getElementById('month-table-card').classList.remove('hidden');
@@ -284,27 +312,18 @@ function renderMonthView() {
     }).join('');
 
     html += `<tr>
-      <td class="name">
-        <b>${p.name}</b><br>
-        <span class="badge ${roleClass}">${p.role||''}</span>
-        ${p.carryIn ? `<div style="font-size:10px;color:#9ca3af">перенос ${fmt(p.carryIn)}</div>` : ''}
-      </td>
-      ${attBtns}
-      ${payBtns}
+      <td class="name"><b>${p.name}</b><br><span class="badge ${roleClass}">${p.role||''}</span>
+      ${p.carryIn?`<div style="font-size:10px;color:#9ca3af">перенос ${fmt(p.carryIn)}</div>`:''}</td>
+      ${attBtns}${payBtns}
       <td><input type="number" value="${p.adj||0}" onchange="setAdj('${esc(p.name)}',this.value)"></td>
-      <td>
-        <div class="${c.debt>0?'debt':(c.credit>0?'credit':'ok')}">${fmt(c.debt)} ₺</div>
-        <div style="font-size:10px;color:#9ca3af">${c.st}</div>
-      </td>
+      <td><div class="${c.debt>0?'debt':(c.credit>0?'credit':'ok')}">${fmt(c.debt)} ₺</div>
+      <div style="font-size:10px;color:#9ca3af">${c.st}</div></td>
     </tr>`;
   });
-
   document.getElementById('tbody').innerHTML = html;
 }
 
-function esc(n) {
-  return String(n).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-}
+function esc(n){ return String(n).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
 async function toggleAtt(player, week, cur) {
   const next = cur==='Был' ? 'Не был' : (cur==='Не был' ? '' : 'Был');
@@ -313,12 +332,9 @@ async function toggleAtt(player, week, cur) {
     await apiPost({ month: currentMonth, player, type: 'att', week, value: next });
     const p = monthData.players.find(x => x.name === player);
     if (p) p.att[week-1] = next;
-    renderMonthView();
-    renderDashboard();
+    renderMonthView(); renderDashboard();
     toast('Сохранено');
-  } catch(e) {
-    toast('Ошибка: ' + e.message);
-  }
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
 
 async function togglePay(player, week, cur) {
@@ -328,12 +344,9 @@ async function togglePay(player, week, cur) {
     await apiPost({ month: currentMonth, player, type: 'pay', week, value: next });
     const p = monthData.players.find(x => x.name === player);
     if (p) p.pay[week-1] = next;
-    renderMonthView();
-    renderDashboard();
+    renderMonthView(); renderDashboard();
     toast('Сохранено');
-  } catch(e) {
-    toast('Ошибка: ' + e.message);
-  }
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
 
 async function setAdj(player, value) {
@@ -341,9 +354,22 @@ async function setAdj(player, value) {
     await apiPost({ month: currentMonth, player, type: 'adj', value: Number(value)||0 });
     const p = monthData.players.find(x => x.name === player);
     if (p) p.adj = Number(value)||0;
-    renderMonthView();
-    renderDashboard();
+    renderMonthView(); renderDashboard();
     toast('Корректировка сохранена');
+  } catch(e){ toast('Ошибка: '+e.message); }
+}
+
+async function addPlayer() {
+  const name = document.getElementById('new-player-name').value.trim();
+  const role = document.getElementById('new-player-role').value;
+  if (!name) { toast('Введите имя'); return; }
+
+  try {
+    toast('Добавляю...');
+    await apiPost({ action: 'addPlayer', month: currentMonth, player: name, role: role });
+    document.getElementById('new-player-name').value = '';
+    toast('Игрок добавлен');
+    await loadMonth(currentMonth);
   } catch(e) {
     toast('Ошибка: ' + e.message);
   }
@@ -361,8 +387,7 @@ async function loadMonth(name) {
   try {
     monthData = await apiGet({ action: 'month', name });
     currentMonth = name;
-    renderMonthView();
-    renderDashboard();
+    renderMonthView(); renderDashboard();
   } catch(e) {
     document.getElementById('month-loading').classList.add('hidden');
     document.getElementById('month-error').textContent = 'Ошибка: ' + e.message;
@@ -393,9 +418,7 @@ async function reloadAll() {
     if (!currentMonth && months.length) currentMonth = months[0];
     if (currentMonth) await loadMonth(currentMonth);
     toast('Обновлено');
-  } catch(e) {
-    toast('Ошибка: ' + e.message);
-  }
+  } catch(e){ toast('Ошибка: '+e.message); }
 }
 
 async function init() {

@@ -81,6 +81,7 @@ input[type=number]{width:52px;text-align:center}
 .mode-btn{font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;line-height:1.2}
 .mode-btn.active-abo{background:#059669;color:#fff;border-color:#047857}
 .mode-btn.active-fact{background:#d97706;color:#fff;border-color:#b45309}
+.edit-btn{font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;margin-top:4px;margin-left:4px}
 @media (max-width:480px){
   .stat .v{font-size:18px}
   .toggle-att,.toggle-pay{width:32px;height:32px}
@@ -194,7 +195,7 @@ input[type=number]{width:52px;text-align:center}
 <div id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbyppm-Tkkk4BFAERBVRjdrMsT0nFYVOb2gVdjAPfw7gn_v_vy5WV_xXgna-25I5F3qmTA/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbxpJDbfT12sCfkBDMJObnQbfFy5ArNsCdPaBMMs7Sj8AfKth6aZ3RPtZFK0f-H5J2Oj/exec';
 var months = [];
 var currentMonth = null;
 var monthData = null;
@@ -420,10 +421,14 @@ function renderMonthView() {
         '" onclick="setMode(\'' + esc(p.name) + '\',\'fact\',\'' + esc(mName) + '\')">за факт</button>' +
       '</div>';
 
+    var editBtn =
+      '<button class="edit-btn" onclick="editPlayer(\'' + esc(p.name) + '\',\'' + esc(mName) + '\',\'' +
+      esc(p.role || 'Игрок') + '\',\'' + esc(c.mode || 'abo') + '\')">Изменить</button>';
+
     html += '<tr>' +
       '<td class="name"><b>' + p.name + '</b><br>' +
       '<span class="badge ' + rc + '">' + (p.role || '') + '</span>' +
-      modeBtns +
+      modeBtns + editBtn +
       (p.carryIn ? '<div style="font-size:10px;color:var(--muted)">перенос ' + fmt(p.carryIn) + '</div>' : '') +
       '</td>' +
       attBtns + payBtns +
@@ -441,17 +446,11 @@ function esc(n) {
 
 function setMode(player, mode, monthFromBtn) {
   var month = String(monthFromBtn || getMonth() || '').trim();
-  if (!month) {
-    toast('Месяц не выбран. Открой вкладку «Месяц»');
-    return;
-  }
+  if (!month) { toast('Месяц не выбран'); return; }
   var p = monthData && monthData.players
     ? monthData.players.find(function(x) { return x.name === player; })
     : null;
-  if (!p) {
-    toast('Игрок не найден');
-    return;
-  }
+  if (!p) { toast('Игрок не найден'); return; }
   if ((p.mode || 'abo') === mode) return;
 
   toast('Сохраняю (' + month + ')...');
@@ -460,9 +459,73 @@ function setMode(player, mode, monthFromBtn) {
       toast(mode === 'fact' ? 'Режим: за факт' : 'Режим: абонемент');
       return loadMonth(month);
     })
-    .catch(function(e) {
-      toast('Ошибка: ' + e.message);
-    });
+    .catch(function(e) { toast('Ошибка: ' + e.message); });
+}
+
+function editPlayer(player, monthFromBtn, currentRole, currentMode) {
+  var month = String(monthFromBtn || getMonth() || '').trim();
+  if (!month) { toast('Месяц не выбран'); return; }
+
+  var action = prompt(
+    'Игрок: ' + player + '\nМесяц: ' + month + '\n\n' +
+    '1 — изменить имя\n' +
+    '2 — изменить роль\n' +
+    '3 — удалить из месяца\n' +
+    '4 — режим: абонемент\n' +
+    '5 — режим: за факт\n' +
+    '0 — отмена\n\n' +
+    'Сейчас: ' + (currentMode === 'fact' ? 'за факт' : 'абонемент') + '\nВведите номер:',
+    '1'
+  );
+  if (action === null || action === '0') return;
+
+  if (action === '1') {
+    var newName = prompt('Новое имя:', player);
+    if (newName === null) return;
+    newName = String(newName).trim();
+    if (!newName) { toast('Имя пустое'); return; }
+    toast('Сохраняю имя...');
+    apiPost({ month: month, player: player, type: 'rename', value: newName })
+      .then(function() { toast('Имя изменено'); return loadMonth(month); })
+      .catch(function(e) { toast('Ошибка: ' + e.message); });
+    return;
+  }
+
+  if (action === '2') {
+    var newRole = prompt('Роль (Игрок / Админ / Гость):', currentRole || 'Игрок');
+    if (newRole === null) return;
+    newRole = String(newRole).trim();
+    if (['Игрок', 'Админ', 'Гость'].indexOf(newRole) < 0) {
+      toast('Только: Игрок, Админ, Гость');
+      return;
+    }
+    toast('Сохраняю роль...');
+    apiPost({ month: month, player: player, type: 'role', value: newRole })
+      .then(function() { toast('Роль изменена'); return loadMonth(month); })
+      .catch(function(e) { toast('Ошибка: ' + e.message); });
+    return;
+  }
+
+  if (action === '3') {
+    if (!confirm('Удалить «' + player + '» из месяца ' + month + '?')) return;
+    toast('Удаляю...');
+    apiPost({ month: month, player: player, type: 'delete', value: '1' })
+      .then(function() { toast('Удалён'); return loadMonth(month); })
+      .catch(function(e) { toast('Ошибка: ' + e.message); });
+    return;
+  }
+
+  if (action === '4' || action === '5') {
+    var mode = action === '5' ? 'fact' : 'abo';
+    if ((currentMode || 'abo') === mode) { toast('Уже этот режим'); return; }
+    toast('Сохраняю режим...');
+    apiPost({ month: month, player: player, type: 'mode', value: mode })
+      .then(function() {
+        toast(mode === 'fact' ? 'Режим: за факт' : 'Режим: абонемент');
+        return loadMonth(month);
+      })
+      .catch(function(e) { toast('Ошибка: ' + e.message); });
+  }
 }
 
 function toggleAtt(player, week, cur, monthFromBtn) {
@@ -560,7 +623,7 @@ function loadMonth(name) {
 }
 
 function createNextMonth() {
-  if (!confirm('Создать следующий месяц и перенести долги по новым правилам?')) return;
+  if (!confirm('Создать следующий месяц и перенести долги?')) return;
   toast('Создаю...');
   apiPost({ action: 'newMonth' })
     .then(function(res) {
@@ -568,9 +631,7 @@ function createNextMonth() {
       return reloadAll().then(function() {
         currentMonth = res.month;
         return loadMonth(currentMonth);
-      }).then(function() {
-        show('m');
-      });
+      }).then(function() { show('m'); });
     })
     .catch(function(e) { toast('Ошибка: ' + e.message); });
 }

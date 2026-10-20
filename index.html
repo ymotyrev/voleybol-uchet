@@ -255,15 +255,10 @@ function calcPlayer(p, price, trainings) {
 
   if (attCount === 0 && payCount === 0 && (Number(p.adj) || 0) === 0) {
     return {
-      attCount: attCount,
-      missed: missed,
-      paid: paid,
-      debt: carryIn,
-      credit: 0,
+      attCount: attCount, missed: missed, paid: paid, debt: carryIn, credit: 0,
       carryOut: carryIn,
       st: carryIn > 0 ? ('перенос ' + fmt(carryIn)) : (carryIn < 0 ? ('кредит ' + fmt(-carryIn)) : 'не участвовал'),
-      mode: mode,
-      inactive: true
+      mode: mode, inactive: true
     };
   }
 
@@ -282,17 +277,7 @@ function calcPlayer(p, price, trainings) {
   else if (credit > 0) st = 'кредит +' + fmt(credit);
   else st = 'оплачено';
 
-  return {
-    attCount: attCount,
-    missed: missed,
-    paid: paid,
-    debt: debt,
-    credit: credit,
-    carryOut: carryOut,
-    st: st,
-    mode: mode,
-    inactive: false
-  };
+  return { attCount: attCount, missed: missed, paid: paid, debt: debt, credit: credit, carryOut: carryOut, st: st, mode: mode, inactive: false };
 }
 
 function fmt(n) {
@@ -398,7 +383,9 @@ function renderMonthView() {
   var trainings = monthData.trainings || 5;
   document.getElementById('base').textContent = fmt(price * trainings);
 
+  var mName = currentMonth || getMonth() || '';
   var html = '';
+
   (monthData.players || []).forEach(function(p) {
     var c = calcPlayer(p, price, trainings);
     var rc = p.role === 'Админ' ? 'admin' : (p.role === 'Гость' ? 'guest' : 'player');
@@ -410,7 +397,9 @@ function renderMonthView() {
       var v = att[i] || '';
       var cls = v === 'Был' ? 'yes' : (v === 'Не был' ? 'no' : '');
       var sym = v === 'Был' ? '+' : (v === 'Не был' ? 'x' : '.');
-      attBtns += '<td><button class="toggle-att ' + cls + '" onclick="toggleAtt(\'' + esc(p.name) + '\',' + (i + 1) + ',\'' + v + '\')">' + sym + '</button></td>';
+      attBtns += '<td><button class="toggle-att ' + cls +
+        '" onclick="toggleAtt(\'' + esc(p.name) + '\',' + (i + 1) + ',\'' + v + '\',\'' + esc(mName) + '\')">' +
+        sym + '</button></td>';
     }
 
     var payBtns = '';
@@ -418,13 +407,17 @@ function renderMonthView() {
       var pv = pay[j] || '';
       var pcls = pv === 'Сдал' ? 'yes' : (pv === 'Не сдал' ? 'no' : '');
       var psym = pv === 'Сдал' ? '+' : (pv === 'Не сдал' ? 'x' : '.');
-      payBtns += '<td><button class="toggle-pay ' + pcls + '" onclick="togglePay(\'' + esc(p.name) + '\',' + (j + 1) + ',\'' + pv + '\')">' + psym + '</button></td>';
+      payBtns += '<td><button class="toggle-pay ' + pcls +
+        '" onclick="togglePay(\'' + esc(p.name) + '\',' + (j + 1) + ',\'' + pv + '\',\'' + esc(mName) + '\')">' +
+        psym + '</button></td>';
     }
 
     var modeBtns =
       '<div class="mode-wrap">' +
-      '<button class="mode-btn ' + (c.mode !== 'fact' ? 'active-abo' : '') + '" onclick="setMode(\'' + esc(p.name) + '\',\'abo\')">абонемент</button>' +
-      '<button class="mode-btn ' + (c.mode === 'fact' ? 'active-fact' : '') + '" onclick="setMode(\'' + esc(p.name) + '\',\'fact\')">за факт</button>' +
+      '<button class="mode-btn ' + (c.mode !== 'fact' ? 'active-abo' : '') +
+        '" onclick="setMode(\'' + esc(p.name) + '\',\'abo\',\'' + esc(mName) + '\')">абонемент</button>' +
+      '<button class="mode-btn ' + (c.mode === 'fact' ? 'active-fact' : '') +
+        '" onclick="setMode(\'' + esc(p.name) + '\',\'fact\',\'' + esc(mName) + '\')">за факт</button>' +
       '</div>';
 
     html += '<tr>' +
@@ -434,7 +427,7 @@ function renderMonthView() {
       (p.carryIn ? '<div style="font-size:10px;color:var(--muted)">перенос ' + fmt(p.carryIn) + '</div>' : '') +
       '</td>' +
       attBtns + payBtns +
-      '<td><input type="number" value="' + (p.adj || 0) + '" onchange="setAdj(\'' + esc(p.name) + '\', this.value)"></td>' +
+      '<td><input type="number" value="' + (p.adj || 0) + '" onchange="setAdj(\'' + esc(p.name) + '\', this.value, \'' + esc(mName) + '\')"></td>' +
       '<td><div class="' + (c.debt > 0 ? 'debt' : (c.credit > 0 ? 'credit' : 'ok')) + '">' + fmt(c.debt) + '</div>' +
       '<div style="font-size:10px;color:var(--muted)">' + c.st + '</div></td>' +
       '</tr>';
@@ -446,8 +439,8 @@ function esc(n) {
   return String(n).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
-function setMode(player, mode) {
-  var month = getMonth();
+function setMode(player, mode, monthFromBtn) {
+  var month = String(monthFromBtn || getMonth() || '').trim();
   if (!month) {
     toast('Месяц не выбран. Открой вкладку «Месяц»');
     return;
@@ -472,8 +465,8 @@ function setMode(player, mode) {
     });
 }
 
-function toggleAtt(player, week, cur) {
-  var month = getMonth();
+function toggleAtt(player, week, cur, monthFromBtn) {
+  var month = String(monthFromBtn || getMonth() || '').trim();
   if (!month) { toast('Месяц не выбран'); return; }
   var next = cur === 'Был' ? 'Не был' : (cur === 'Не был' ? '' : 'Был');
   toast('Сохраняю...');
@@ -485,13 +478,11 @@ function toggleAtt(player, week, cur) {
       renderDashboard();
       toast('Сохранено');
     })
-    .catch(function(e) {
-      toast('Ошибка: ' + e.message);
-    });
+    .catch(function(e) { toast('Ошибка: ' + e.message); });
 }
 
-function togglePay(player, week, cur) {
-  var month = getMonth();
+function togglePay(player, week, cur, monthFromBtn) {
+  var month = String(monthFromBtn || getMonth() || '').trim();
   if (!month) { toast('Месяц не выбран'); return; }
   var next = cur === 'Сдал' ? 'Не сдал' : (cur === 'Не сдал' ? '' : 'Сдал');
   toast('Сохраняю...');
@@ -503,13 +494,11 @@ function togglePay(player, week, cur) {
       renderDashboard();
       toast('Сохранено');
     })
-    .catch(function(e) {
-      toast('Ошибка: ' + e.message);
-    });
+    .catch(function(e) { toast('Ошибка: ' + e.message); });
 }
 
-function setAdj(player, value) {
-  var month = getMonth();
+function setAdj(player, value, monthFromBtn) {
+  var month = String(monthFromBtn || getMonth() || '').trim();
   if (!month) { toast('Месяц не выбран'); return; }
   apiPost({ month: month, player: player, type: 'adj', value: Number(value) || 0 })
     .then(function() {
@@ -519,9 +508,7 @@ function setAdj(player, value) {
       renderDashboard();
       toast('Сохранено');
     })
-    .catch(function(e) {
-      toast('Ошибка: ' + e.message);
-    });
+    .catch(function(e) { toast('Ошибка: ' + e.message); });
 }
 
 function addPlayer() {
@@ -538,9 +525,7 @@ function addPlayer() {
       toast('Игрок добавлен');
       return loadMonth(month);
     })
-    .catch(function(e) {
-      toast('Ошибка: ' + e.message);
-    });
+    .catch(function(e) { toast('Ошибка: ' + e.message); });
 }
 
 function changeMonth() {
@@ -587,9 +572,7 @@ function createNextMonth() {
         show('m');
       });
     })
-    .catch(function(e) {
-      toast('Ошибка: ' + e.message);
-    });
+    .catch(function(e) { toast('Ошибка: ' + e.message); });
 }
 
 function reloadAll() {
@@ -600,12 +583,8 @@ function reloadAll() {
       if (!currentMonth && months.length) currentMonth = months[0];
       if (currentMonth) return loadMonth(currentMonth);
     })
-    .then(function() {
-      toast('Обновлено');
-    })
-    .catch(function(e) {
-      toast('Ошибка: ' + e.message);
-    });
+    .then(function() { toast('Обновлено'); })
+    .catch(function(e) { toast('Ошибка: ' + e.message); });
 }
 
 function init() {
@@ -617,9 +596,7 @@ function init() {
         return;
       }
       currentMonth = months.indexOf('Сентябрь') >= 0 ? 'Сентябрь' : months[0];
-      return loadMonth(currentMonth).then(function() {
-        show('d');
-      });
+      return loadMonth(currentMonth).then(function() { show('d'); });
     })
     .catch(function(e) {
       document.getElementById('dash-loading').innerHTML =
